@@ -1,0 +1,2 @@
+Iteration: 0, training loss 28.34758959093364, val_loss 27.65997541993021 
+Elapsed time 20.674466666666667 min epoch : 1.0

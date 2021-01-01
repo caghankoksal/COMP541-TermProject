@@ -1,0 +1,2 @@
+Iteration: 0, training loss 28.175314164690064, test_loss 27.803417236116776 
+Elapsed time 11.879433333333333 min epoch : 1.0

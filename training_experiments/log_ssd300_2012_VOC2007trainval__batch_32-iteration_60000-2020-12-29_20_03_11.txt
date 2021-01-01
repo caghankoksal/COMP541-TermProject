@@ -1,0 +1,325 @@
+Iteration: 0, training loss 27.229253806983802, test_loss 27.42781766154268 
+Elapsed time 10.974383333333332 min epoch : 1.0
+Iteration: 156, training loss : 27.229253806983802, test_loss : 27.42781766154268 
+Elapsed time 9.397466666666666 min epoch : 2.0
+Iteration: 312, training loss : 27.229253806983802, test_loss : 27.42781766154268 
+Elapsed time 9.49615 min epoch : 3.0
+Iteration: 468, training loss : 27.229253806983802, test_loss : 27.42781766154268 
+Elapsed time 9.51485 min epoch : 4.0
+Iteration: 624, training loss : 27.229253806983802, test_loss : 27.42781766154268 
+Elapsed time 9.990766666666667 min epoch : 5.0
+Iteration: 780, training loss : 27.229253806983802, test_loss : 27.42781766154268 
+Elapsed time 9.776966666666668 min epoch : 6.0
+Iteration: 936, training loss : 27.229253806983802, test_loss : 27.42781766154268 
+Elapsed time 9.811266666666667 min epoch : 7.0
+Iteration: 1092, training loss : 27.229253806983802, test_loss : 27.42781766154268 
+Elapsed time 9.788233333333332 min epoch : 8.0
+Iteration: 1248, training loss : 27.229253806983802, test_loss : 27.42781766154268 
+Elapsed time 9.645316666666668 min epoch : 9.0
+Iteration: 1404, training loss : 27.229253806983802, test_loss : 27.42781766154268 
+Elapsed time 9.556849999999999 min epoch : 10.0
+Iteration: 1560, training loss : 27.229253806983802, test_loss : 27.42781766154268 
+Elapsed time 9.514366666666666 min epoch : 11.0
+Iteration: 1716, training loss : 27.229253806983802, test_loss : 27.42781766154268 
+Elapsed time 9.673316666666667 min epoch : 12.0
+Iteration: 1872, training loss : 27.229253806983802, test_loss : 27.42781766154268 
+Iteration: 2000, training loss 11.224232314834092, test_loss 11.341989409793868 
+Elapsed time 9.794583333333332 min epoch : 13.0
+Iteration: 2028, training loss : 11.224232314834092, test_loss : 11.341989409793868 
+Elapsed time 9.491716666666667 min epoch : 14.0
+Iteration: 2184, training loss : 11.224232314834092, test_loss : 11.341989409793868 
+Elapsed time 9.518766666666666 min epoch : 15.0
+Iteration: 2340, training loss : 11.224232314834092, test_loss : 11.341989409793868 
+Elapsed time 9.487433333333334 min epoch : 16.0
+Iteration: 2496, training loss : 11.224232314834092, test_loss : 11.341989409793868 
+Elapsed time 9.415816666666666 min epoch : 17.0
+Iteration: 2652, training loss : 11.224232314834092, test_loss : 11.341989409793868 
+Elapsed time 9.388283333333334 min epoch : 18.0
+Iteration: 2808, training loss : 11.224232314834092, test_loss : 11.341989409793868 
+Elapsed time 9.560849999999999 min epoch : 19.0
+Iteration: 2964, training loss : 11.224232314834092, test_loss : 11.341989409793868 
+Elapsed time 9.487033333333333 min epoch : 20.0
+Iteration: 3120, training loss : 11.224232314834092, test_loss : 11.341989409793868 
+Elapsed time 9.562316666666668 min epoch : 21.0
+Iteration: 3276, training loss : 11.224232314834092, test_loss : 11.341989409793868 
+Elapsed time 9.674633333333333 min epoch : 22.0
+Iteration: 3432, training loss : 11.224232314834092, test_loss : 11.341989409793868 
+Elapsed time 9.5582 min epoch : 23.0
+Iteration: 3588, training loss : 11.224232314834092, test_loss : 11.341989409793868 
+Elapsed time 9.539883333333334 min epoch : 24.0
+Iteration: 3744, training loss : 11.224232314834092, test_loss : 11.341989409793868 
+Elapsed time 9.6045 min epoch : 25.0
+Iteration: 3900, training loss : 11.224232314834092, test_loss : 11.341989409793868 
+Iteration: 4000, training loss 10.175000854841977, test_loss 10.552553559510258 
+Elapsed time 9.924566666666667 min epoch : 26.0
+Iteration: 4056, training loss : 10.175000854841977, test_loss : 10.552553559510258 
+Elapsed time 9.67305 min epoch : 27.0
+Iteration: 4212, training loss : 10.175000854841977, test_loss : 10.552553559510258 
+Elapsed time 9.562433333333333 min epoch : 28.0
+Iteration: 4368, training loss : 10.175000854841977, test_loss : 10.552553559510258 
+Elapsed time 9.647466666666666 min epoch : 29.0
+Iteration: 4524, training loss : 10.175000854841977, test_loss : 10.552553559510258 
+Elapsed time 9.692233333333332 min epoch : 30.0
+Iteration: 4680, training loss : 10.175000854841977, test_loss : 10.552553559510258 
+Elapsed time 9.674983333333333 min epoch : 31.0
+Iteration: 4836, training loss : 10.175000854841977, test_loss : 10.552553559510258 
+Elapsed time 9.507566666666666 min epoch : 32.0
+Iteration: 4992, training loss : 10.175000854841977, test_loss : 10.552553559510258 
+Elapsed time 9.584966666666666 min epoch : 33.0
+Iteration: 5148, training loss : 10.175000854841977, test_loss : 10.552553559510258 
+Elapsed time 9.601166666666668 min epoch : 34.0
+Iteration: 5304, training loss : 10.175000854841977, test_loss : 10.552553559510258 
+Elapsed time 9.521666666666667 min epoch : 35.0
+Iteration: 5460, training loss : 10.175000854841977, test_loss : 10.552553559510258 
+Elapsed time 9.587533333333333 min epoch : 36.0
+Iteration: 5616, training loss : 10.175000854841977, test_loss : 10.552553559510258 
+Elapsed time 9.610816666666667 min epoch : 37.0
+Iteration: 5772, training loss : 10.175000854841977, test_loss : 10.552553559510258 
+Elapsed time 9.753683333333333 min epoch : 38.0
+Iteration: 5928, training loss : 10.175000854841977, test_loss : 10.552553559510258 
+Iteration: 6000, training loss 10.022814925041093, test_loss 10.416459251722747 
+Elapsed time 9.989216666666666 min epoch : 39.0
+Iteration: 6084, training loss : 10.022814925041093, test_loss : 10.416459251722747 
+Elapsed time 9.487133333333333 min epoch : 40.0
+Iteration: 6240, training loss : 10.022814925041093, test_loss : 10.416459251722747 
+Elapsed time 9.55005 min epoch : 41.0
+Iteration: 6396, training loss : 10.022814925041093, test_loss : 10.416459251722747 
+Elapsed time 9.618716666666668 min epoch : 42.0
+Iteration: 6552, training loss : 10.022814925041093, test_loss : 10.416459251722747 
+Elapsed time 9.603583333333335 min epoch : 43.0
+Iteration: 6708, training loss : 10.022814925041093, test_loss : 10.416459251722747 
+Elapsed time 9.670016666666667 min epoch : 44.0
+Iteration: 6864, training loss : 10.022814925041093, test_loss : 10.416459251722747 
+Elapsed time 9.592733333333333 min epoch : 45.0
+Iteration: 7020, training loss : 10.022814925041093, test_loss : 10.416459251722747 
+Elapsed time 9.578383333333333 min epoch : 46.0
+Iteration: 7176, training loss : 10.022814925041093, test_loss : 10.416459251722747 
+Elapsed time 9.6103 min epoch : 47.0
+Iteration: 7332, training loss : 10.022814925041093, test_loss : 10.416459251722747 
+Elapsed time 9.559266666666668 min epoch : 48.0
+Iteration: 7488, training loss : 10.022814925041093, test_loss : 10.416459251722747 
+Elapsed time 9.735916666666666 min epoch : 49.0
+Iteration: 7644, training loss : 10.022814925041093, test_loss : 10.416459251722747 
+Elapsed time 9.64735 min epoch : 50.0
+Iteration: 7800, training loss : 10.022814925041093, test_loss : 10.416459251722747 
+Elapsed time 9.592899999999998 min epoch : 51.0
+Iteration: 7956, training loss : 10.022814925041093, test_loss : 10.416459251722747 
+Iteration: 8000, training loss 9.509348646914932, test_loss 9.81940128130042 
+Elapsed time 9.931166666666666 min epoch : 52.0
+Iteration: 8112, training loss : 9.509348646914932, test_loss : 9.81940128130042 
+Elapsed time 9.753716666666666 min epoch : 53.0
+Iteration: 8268, training loss : 9.509348646914932, test_loss : 9.81940128130042 
+Elapsed time 9.75095 min epoch : 54.0
+Iteration: 8424, training loss : 9.509348646914932, test_loss : 9.81940128130042 
+Elapsed time 9.658016666666667 min epoch : 55.0
+Iteration: 8580, training loss : 9.509348646914932, test_loss : 9.81940128130042 
+Elapsed time 9.705866666666667 min epoch : 56.0
+Iteration: 8736, training loss : 9.509348646914932, test_loss : 9.81940128130042 
+Elapsed time 9.583333333333334 min epoch : 57.0
+Iteration: 8892, training loss : 9.509348646914932, test_loss : 9.81940128130042 
+Elapsed time 9.559683333333334 min epoch : 58.0
+Iteration: 9048, training loss : 9.509348646914932, test_loss : 9.81940128130042 
+Elapsed time 9.562016666666667 min epoch : 59.0
+Iteration: 9204, training loss : 9.509348646914932, test_loss : 9.81940128130042 
+Elapsed time 9.615733333333333 min epoch : 60.0
+Iteration: 9360, training loss : 9.509348646914932, test_loss : 9.81940128130042 
+Elapsed time 9.50575 min epoch : 61.0
+Iteration: 9516, training loss : 9.509348646914932, test_loss : 9.81940128130042 
+Elapsed time 9.455516666666666 min epoch : 62.0
+Iteration: 9672, training loss : 9.509348646914932, test_loss : 9.81940128130042 
+Elapsed time 9.587449999999999 min epoch : 63.0
+Iteration: 9828, training loss : 9.509348646914932, test_loss : 9.81940128130042 
+Elapsed time 9.505766666666666 min epoch : 64.0
+Iteration: 9984, training loss : 9.509348646914932, test_loss : 9.81940128130042 
+Iteration: 10000, training loss 9.24983891567049, test_loss 9.700623153828587 
+Elapsed time 9.874216666666666 min epoch : 65.0
+Iteration: 10140, training loss : 9.24983891567049, test_loss : 9.700623153828587 
+Elapsed time 9.586500000000001 min epoch : 66.0
+Iteration: 10296, training loss : 9.24983891567049, test_loss : 9.700623153828587 
+Elapsed time 9.491916666666667 min epoch : 67.0
+Iteration: 10452, training loss : 9.24983891567049, test_loss : 9.700623153828587 
+Elapsed time 9.478433333333333 min epoch : 68.0
+Iteration: 10608, training loss : 9.24983891567049, test_loss : 9.700623153828587 
+Elapsed time 9.463683333333334 min epoch : 69.0
+Iteration: 10764, training loss : 9.24983891567049, test_loss : 9.700623153828587 
+Elapsed time 9.542783333333334 min epoch : 70.0
+Iteration: 10920, training loss : 9.24983891567049, test_loss : 9.700623153828587 
+Elapsed time 9.53045 min epoch : 71.0
+Iteration: 11076, training loss : 9.24983891567049, test_loss : 9.700623153828587 
+Elapsed time 9.531583333333334 min epoch : 72.0
+Iteration: 11232, training loss : 9.24983891567049, test_loss : 9.700623153828587 
+Elapsed time 9.57435 min epoch : 73.0
+Iteration: 11388, training loss : 9.24983891567049, test_loss : 9.700623153828587 
+Elapsed time 9.535116666666665 min epoch : 74.0
+Iteration: 11544, training loss : 9.24983891567049, test_loss : 9.700623153828587 
+Elapsed time 9.452233333333334 min epoch : 75.0
+Iteration: 11700, training loss : 9.24983891567049, test_loss : 9.700623153828587 
+Elapsed time 9.468783333333333 min epoch : 76.0
+Iteration: 11856, training loss : 9.24983891567049, test_loss : 9.700623153828587 
+Iteration: 12000, training loss 9.13664173794687, test_loss 9.565579878104334 
+Elapsed time 9.884483333333332 min epoch : 77.0
+Iteration: 12012, training loss : 9.13664173794687, test_loss : 9.565579878104334 
+Elapsed time 9.477266666666667 min epoch : 78.0
+Iteration: 12168, training loss : 9.13664173794687, test_loss : 9.565579878104334 
+Elapsed time 9.589166666666667 min epoch : 79.0
+Iteration: 12324, training loss : 9.13664173794687, test_loss : 9.565579878104334 
+Elapsed time 9.514333333333333 min epoch : 80.0
+Iteration: 12480, training loss : 9.13664173794687, test_loss : 9.565579878104334 
+Elapsed time 9.596516666666668 min epoch : 81.0
+Iteration: 12636, training loss : 9.13664173794687, test_loss : 9.565579878104334 
+Elapsed time 9.522666666666668 min epoch : 82.0
+Iteration: 12792, training loss : 9.13664173794687, test_loss : 9.565579878104334 
+Elapsed time 9.570733333333333 min epoch : 83.0
+Iteration: 12948, training loss : 9.13664173794687, test_loss : 9.565579878104334 
+Elapsed time 9.517316666666666 min epoch : 84.0
+Iteration: 13104, training loss : 9.13664173794687, test_loss : 9.565579878104334 
+Elapsed time 9.547083333333335 min epoch : 85.0
+Iteration: 13260, training loss : 9.13664173794687, test_loss : 9.565579878104334 
+Elapsed time 9.508383333333335 min epoch : 86.0
+Iteration: 13416, training loss : 9.13664173794687, test_loss : 9.565579878104334 
+Elapsed time 9.493183333333333 min epoch : 87.0
+Iteration: 13572, training loss : 9.13664173794687, test_loss : 9.565579878104334 
+Elapsed time 9.50775 min epoch : 88.0
+Iteration: 13728, training loss : 9.13664173794687, test_loss : 9.565579878104334 
+Elapsed time 9.521516666666667 min epoch : 89.0
+Iteration: 13884, training loss : 9.13664173794687, test_loss : 9.565579878104334 
+Iteration: 14000, training loss 9.081283951436527, test_loss 9.469545353899798 
+Elapsed time 9.7721 min epoch : 90.0
+Iteration: 14040, training loss : 9.081283951436527, test_loss : 9.469545353899798 
+Elapsed time 9.337566666666667 min epoch : 91.0
+Iteration: 14196, training loss : 9.081283951436527, test_loss : 9.469545353899798 
+Elapsed time 9.26315 min epoch : 92.0
+Iteration: 14352, training loss : 9.081283951436527, test_loss : 9.469545353899798 
+Elapsed time 9.358316666666667 min epoch : 93.0
+Iteration: 14508, training loss : 9.081283951436527, test_loss : 9.469545353899798 
+Elapsed time 9.309466666666667 min epoch : 94.0
+Iteration: 14664, training loss : 9.081283951436527, test_loss : 9.469545353899798 
+Elapsed time 9.436566666666666 min epoch : 95.0
+Iteration: 14820, training loss : 9.081283951436527, test_loss : 9.469545353899798 
+Elapsed time 9.2347 min epoch : 96.0
+Iteration: 14976, training loss : 9.081283951436527, test_loss : 9.469545353899798 
+Elapsed time 9.298366666666668 min epoch : 97.0
+Iteration: 15132, training loss : 9.081283951436527, test_loss : 9.469545353899798 
+Elapsed time 9.380583333333334 min epoch : 98.0
+Iteration: 15288, training loss : 9.081283951436527, test_loss : 9.469545353899798 
+Elapsed time 9.3171 min epoch : 99.0
+Iteration: 15444, training loss : 9.081283951436527, test_loss : 9.469545353899798 
+Elapsed time 9.358883333333333 min epoch : 100.0
+Iteration: 15600, training loss : 9.081283951436527, test_loss : 9.469545353899798 
+Elapsed time 9.356333333333334 min epoch : 101.0
+Iteration: 15756, training loss : 9.081283951436527, test_loss : 9.469545353899798 
+Elapsed time 9.328949999999999 min epoch : 102.0
+Iteration: 15912, training loss : 9.081283951436527, test_loss : 9.469545353899798 
+Iteration: 16000, training loss 8.931506416750063, test_loss 9.347981840953143 
+Elapsed time 9.624566666666668 min epoch : 103.0
+Iteration: 16068, training loss : 8.931506416750063, test_loss : 9.347981840953143 
+Elapsed time 9.46025 min epoch : 104.0
+Iteration: 16224, training loss : 8.931506416750063, test_loss : 9.347981840953143 
+Elapsed time 9.49545 min epoch : 105.0
+Iteration: 16380, training loss : 8.931506416750063, test_loss : 9.347981840953143 
+Elapsed time 9.429083333333333 min epoch : 106.0
+Iteration: 16536, training loss : 8.931506416750063, test_loss : 9.347981840953143 
+Elapsed time 9.402016666666666 min epoch : 107.0
+Iteration: 16692, training loss : 8.931506416750063, test_loss : 9.347981840953143 
+Elapsed time 9.435866666666668 min epoch : 108.0
+Iteration: 16848, training loss : 8.931506416750063, test_loss : 9.347981840953143 
+Elapsed time 9.398716666666667 min epoch : 109.0
+Iteration: 17004, training loss : 8.931506416750063, test_loss : 9.347981840953143 
+Elapsed time 9.422966666666667 min epoch : 110.0
+Iteration: 17160, training loss : 8.931506416750063, test_loss : 9.347981840953143 
+Elapsed time 9.421766666666667 min epoch : 111.0
+Iteration: 17316, training loss : 8.931506416750063, test_loss : 9.347981840953143 
+Elapsed time 9.58675 min epoch : 112.0
+Iteration: 17472, training loss : 8.931506416750063, test_loss : 9.347981840953143 
+Elapsed time 9.495299999999999 min epoch : 113.0
+Iteration: 17628, training loss : 8.931506416750063, test_loss : 9.347981840953143 
+Elapsed time 9.574533333333333 min epoch : 114.0
+Iteration: 17784, training loss : 8.931506416750063, test_loss : 9.347981840953143 
+Elapsed time 9.614483333333334 min epoch : 115.0
+Iteration: 17940, training loss : 8.931506416750063, test_loss : 9.347981840953143 
+Iteration: 18000, training loss 8.84809178548895, test_loss 9.314247672500164 
+Elapsed time 9.752866666666668 min epoch : 116.0
+Iteration: 18096, training loss : 8.84809178548895, test_loss : 9.314247672500164 
+Elapsed time 9.655650000000001 min epoch : 117.0
+Iteration: 18252, training loss : 8.84809178548895, test_loss : 9.314247672500164 
+Elapsed time 9.657283333333334 min epoch : 118.0
+Iteration: 18408, training loss : 8.84809178548895, test_loss : 9.314247672500164 
+Elapsed time 9.511566666666665 min epoch : 119.0
+Iteration: 18564, training loss : 8.84809178548895, test_loss : 9.314247672500164 
+Elapsed time 9.573649999999999 min epoch : 120.0
+Iteration: 18720, training loss : 8.84809178548895, test_loss : 9.314247672500164 
+Elapsed time 9.668650000000001 min epoch : 121.0
+Iteration: 18876, training loss : 8.84809178548895, test_loss : 9.314247672500164 
+Elapsed time 9.516416666666666 min epoch : 122.0
+Iteration: 19032, training loss : 8.84809178548895, test_loss : 9.314247672500164 
+Elapsed time 9.608483333333334 min epoch : 123.0
+Iteration: 19188, training loss : 8.84809178548895, test_loss : 9.314247672500164 
+Elapsed time 9.6188 min epoch : 124.0
+Iteration: 19344, training loss : 8.84809178548895, test_loss : 9.314247672500164 
+Elapsed time 9.603250000000001 min epoch : 125.0
+Iteration: 19500, training loss : 8.84809178548895, test_loss : 9.314247672500164 
+Elapsed time 9.639999999999999 min epoch : 126.0
+Iteration: 19656, training loss : 8.84809178548895, test_loss : 9.314247672500164 
+Elapsed time 9.610216666666668 min epoch : 127.0
+Iteration: 19812, training loss : 8.84809178548895, test_loss : 9.314247672500164 
+Elapsed time 9.628983333333334 min epoch : 128.0
+Iteration: 19968, training loss : 8.84809178548895, test_loss : 9.314247672500164 
+Iteration: 20000, training loss 8.730296743539899, test_loss 9.296978626025222 
+Elapsed time 9.578633333333332 min epoch : 129.0
+Iteration: 20124, training loss : 8.730296743539899, test_loss : 9.296978626025222 
+Elapsed time 9.227583333333333 min epoch : 130.0
+Iteration: 20280, training loss : 8.730296743539899, test_loss : 9.296978626025222 
+Elapsed time 9.245166666666668 min epoch : 131.0
+Iteration: 20436, training loss : 8.730296743539899, test_loss : 9.296978626025222 
+Elapsed time 9.290750000000001 min epoch : 132.0
+Iteration: 20592, training loss : 8.730296743539899, test_loss : 9.296978626025222 
+Elapsed time 9.212433333333333 min epoch : 133.0
+Iteration: 20748, training loss : 8.730296743539899, test_loss : 9.296978626025222 
+Elapsed time 9.2552 min epoch : 134.0
+Iteration: 20904, training loss : 8.730296743539899, test_loss : 9.296978626025222 
+Elapsed time 9.180383333333333 min epoch : 135.0
+Iteration: 21060, training loss : 8.730296743539899, test_loss : 9.296978626025222 
+Elapsed time 9.208466666666668 min epoch : 136.0
+Iteration: 21216, training loss : 8.730296743539899, test_loss : 9.296978626025222 
+Elapsed time 9.236516666666667 min epoch : 137.0
+Iteration: 21372, training loss : 8.730296743539899, test_loss : 9.296978626025222 
+Elapsed time 9.466483333333334 min epoch : 138.0
+Iteration: 21528, training loss : 8.730296743539899, test_loss : 9.296978626025222 
+Elapsed time 9.531383333333334 min epoch : 139.0
+Iteration: 21684, training loss : 8.730296743539899, test_loss : 9.296978626025222 
+Elapsed time 9.5671 min epoch : 140.0
+Iteration: 21840, training loss : 8.730296743539899, test_loss : 9.296978626025222 
+Elapsed time 9.462016666666667 min epoch : 141.0
+Iteration: 21996, training loss : 8.730296743539899, test_loss : 9.296978626025222 
+Iteration: 22000, training loss 8.964749195171475, test_loss 9.369031396665536 
+Elapsed time 9.788350000000001 min epoch : 142.0
+Iteration: 22152, training loss : 8.964749195171475, test_loss : 9.369031396665536 
+Elapsed time 9.447083333333333 min epoch : 143.0
+Iteration: 22308, training loss : 8.964749195171475, test_loss : 9.369031396665536 
+Elapsed time 9.345 min epoch : 144.0
+Iteration: 22464, training loss : 8.964749195171475, test_loss : 9.369031396665536 
+Elapsed time 9.362150000000002 min epoch : 145.0
+Iteration: 22620, training loss : 8.964749195171475, test_loss : 9.369031396665536 
+Elapsed time 9.455549999999999 min epoch : 146.0
+Iteration: 22776, training loss : 8.964749195171475, test_loss : 9.369031396665536 
+Elapsed time 9.551533333333333 min epoch : 147.0
+Iteration: 22932, training loss : 8.964749195171475, test_loss : 9.369031396665536 
+Elapsed time 9.479616666666667 min epoch : 148.0
+Iteration: 23088, training loss : 8.964749195171475, test_loss : 9.369031396665536 
+Elapsed time 9.435616666666666 min epoch : 149.0
+Iteration: 23244, training loss : 8.964749195171475, test_loss : 9.369031396665536 
+Elapsed time 9.532866666666667 min epoch : 150.0
+Iteration: 23400, training loss : 8.964749195171475, test_loss : 9.369031396665536 
+Elapsed time 9.430816666666667 min epoch : 151.0
+Iteration: 23556, training loss : 8.964749195171475, test_loss : 9.369031396665536 
+Elapsed time 9.43155 min epoch : 152.0
+Iteration: 23712, training loss : 8.964749195171475, test_loss : 9.369031396665536 
+Elapsed time 9.532866666666667 min epoch : 153.0
+Iteration: 23868, training loss : 8.964749195171475, test_loss : 9.369031396665536 
+Iteration: 24000, training loss 8.951188744403703, test_loss 9.273910112130126 
+Elapsed time 9.877966666666667 min epoch : 154.0
+Iteration: 24024, training loss : 8.951188744403703, test_loss : 9.273910112130126 
+Elapsed time 9.548683333333335 min epoch : 155.0
+Iteration: 24180, training loss : 8.951188744403703, test_loss : 9.273910112130126 
+Elapsed time 9.48835 min epoch : 156.0
+Iteration: 24336, training loss : 8.951188744403703, test_loss : 9.273910112130126 

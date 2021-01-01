@@ -1,0 +1,5 @@
+Iteration: 0, training loss 6.094388996149338, val_loss 6.060995136286056 
+Iteration: 100, training loss 6.35675461575914, val_loss 6.0224235801451265 
+Iteration: 200, training loss 6.079712513578134, val_loss 6.005817774427133 
+Iteration: 300, training loss 6.081238167535405, val_loss 5.995838778268437 
+Iteration: 0, training loss 5.874037859129185, val_loss 5.994255182432408 
