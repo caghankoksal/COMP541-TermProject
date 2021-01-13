@@ -95,6 +95,8 @@ function creteBBobject(filename)
     """
     Reads and parse the XML file and create Bounding Box object.
     """
+    
+    #println("Filename", filename)
     xdoc = parse_file(filename)
     xroot = root(xdoc)  # an instance of XMLElement
     filename = content(xroot["filename"][1])
@@ -106,10 +108,17 @@ function creteBBobject(filename)
     
     bounding_boxes = zeros(num_bb,4) # Xmin,ymin, xmax,ymax
     
+    
     for (i,bb) in enumerate(bb_array)
-        pose = content(find_element(bb, "pose"))
+        #println(bb)
+        #pose = content(find_element(bb, "pose"))
         class = content(find_element(bb, "name"))
-        difficulty = content(find_element(bb, "difficult"))
+        try
+            difficulty = content(find_element(bb, "difficult"))
+        catch
+            difficulty = "0"
+        end
+            
         
         
         xmin = content(find_element(find_element(bb, "bndbox"),"xmin"))
@@ -231,6 +240,8 @@ function xy_to_cxcy(bbs)
     return hcat(centers,width_height)
     
 end
+
+
 
 
 

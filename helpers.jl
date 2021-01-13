@@ -1,4 +1,7 @@
 include("config.jl")
+
+
+
 function decimate(layer, m, atype )
     
     # Downsample by keeping every m'th value

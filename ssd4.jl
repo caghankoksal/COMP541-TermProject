@@ -1,6 +1,9 @@
 include("dataset.jl")
 include("config.jl")
+include("layers.jl")
 include("pretrained_ssd300.jl")
+include("utilities.jl")
+include("train.jl")
 
 n_boxes = Dict(
     "conv4_3" => 4,
@@ -72,8 +75,8 @@ end
 
 
 
-(c::Conv)(x) = c.f.(pool(conv4(c.w, x, padding=c.pad, stride = c.conv_stride, dilation = c.dilation) .+ c.b, window = c.pool_window_size, padding=c.pool_pad, stride=c.pool_stride))
-
+(c::Conv)(x) = pool(c.f.(conv4(c.w, x, padding=c.pad, stride = c.conv_stride, dilation = c.dilation) .+ c.b), window = c.pool_window_size, padding=c.pool_pad, stride=c.pool_stride)
+#(c::Conv)(x) = c.f.(conv4(c.w, x, padding=c.pad, stride = c.conv_stride, dilation = c.dilation, mode=0) .+ c.b)
 
 
 mutable struct VGG16  firstlayers; secondlayers; end;
@@ -210,7 +213,7 @@ function (prediction_heads::SSDheads)(conv4_3_feats, conv7_feats, conv8_2_feats,
     
     #l_conv4_3 = permuetdims(l_conv4_3, (3, 2, 1))
     
-    println(typeof(l_conv4_3))
+    #println(typeof(l_conv4_3))
     
   
     
@@ -254,7 +257,6 @@ function (prediction_heads::SSDheads)(conv4_3_feats, conv7_feats, conv8_2_feats,
     c_conv4_3 = reshape(c_conv4_3, expectedShape(length(c_conv4_3),batch_size,n_classes) )
     c_conv7 = prediction_heads.classification_layers.layers[2](conv7_feats)         # (19, 19, 6 * n_classes,1) -->  (19, 19, 126,1)
     c_conv7 = permutedims(c_conv7,(3,1,2,4))
-    
     c_conv7 = reshape(c_conv7, expectedShape(length(c_conv7),batch_size,n_classes) )
     
     c_conv8_2 = prediction_heads.classification_layers.layers[3](conv8_2_feats)  # (10, 10, 6 * n_classes, 1) --> (10,10,24,1)
@@ -264,8 +266,8 @@ function (prediction_heads::SSDheads)(conv4_3_feats, conv7_feats, conv8_2_feats,
     
     c_conv9_2 = prediction_heads.classification_layers.layers[4](conv9_2_feats)  # (5, 5, 6 * n_classes, 1)   --> (5,5,24,1)
     c_conv9_2 = permutedims(c_conv9_2,(3,1,2,4))
-    
     c_conv9_2 = reshape(c_conv9_2, expectedShape(length(c_conv9_2),batch_size,n_classes) )
+    
     c_conv10_2 = prediction_heads.classification_layers.layers[5](conv10_2_feats)  # ( 3, 3, 4 * n_classes,1)-->  (5,5,16,1)
     c_conv10_2 = permutedims(c_conv10_2,(3,1,2,4))
     c_conv10_2 = reshape(c_conv10_2, expectedShape(length(c_conv10_2),batch_size,n_classes) )
@@ -277,18 +279,18 @@ function (prediction_heads::SSDheads)(conv4_3_feats, conv7_feats, conv8_2_feats,
     c_conv11_2 = reshape(c_conv11_2, expectedShape(length(c_conv11_2),batch_size,n_classes) )    
 
 
-    locs = hcat(l_conv4_3, l_conv7, l_conv8_2, l_conv9_2, l_conv10_2, l_conv11_2)  # (8732, 4,1)
+                locs=hcat(l_conv4_3, l_conv7, l_conv8_2, l_conv9_2, l_conv10_2, l_conv11_2)  # (8732, 4,1)
     classes_scores = hcat(c_conv4_3, c_conv7, c_conv8_2, c_conv9_2, c_conv10_2, c_conv11_2)
         #,dims=2
                                  #)  # (8732, n_classes,1)
     
-    #classes_scores = permutedims(classes_scores,(2,1,3))
-    #locs = permutedims(locs,(2,1,3))
+    classes_scores = permutedims(classes_scores,(2,1,3))
+    locs = permutedims(locs,(2,1,3))
     
     #locs = permutedims(locs,(2,1,3))
     #classes_scores = permutedims(classes_scores,(2,1,3))
-    println("Locs shape ",size(locs))
-    println("classes_scores shape ",size(classes_scores))
+    #println("Locs shape ",size(locs))
+    #println("classes_scores shape ",size(classes_scores))
     return locs,classes_scores
                 
 end
@@ -307,6 +309,42 @@ function getWeightFromKnetForSecondlayers(model::VGG16,index)
     return w,b
     
 end 
+
+# Converts Pytorch Weights to the Knet Conv shape
+function getweight_pytorch(layer_name,model;atype = atype)
+    
+    #
+    #model = ssd_300_pretrained_weights["model"]
+    
+    weight_layer_name = "$layer_name.weight"
+    bias_layer_name = "$layer_name.bias"
+    
+    weights =  model[weight_layer_name]
+    bias = model[bias_layer_name]
+
+    weights = permutedims(weights ,(4,3,2,1))
+    weights = reverse(weights,dims=1)
+    weights = reverse(weights,dims = 2)
+
+    
+    n_output_bias = size(bias,1)
+    bias = reshape(bias,(1,1,n_output_bias,1))
+    return atype(weights),atype(bias)
+        
+end
+
+
+function getweight_rescale_pytorch(weights)
+    
+    #weights = model["rescale_factors"]
+    n_channel = size(weights,2) #512
+    res_factors = reshape(weights,(1,1,n_channel,1))
+    return atype(res_factors)
+end
+
+    
+    
+    
 
 function  CPU_weights_ToGpu(vgg16::VGG16, train_the_weights = true)
 
@@ -347,8 +385,10 @@ end
 
 mutable struct SSD300 VGG; auxilaryLayer; heads; priors_cxcy; rescale_factor; platform;  end
 
-function SSD300(platform = "CLUSTER", pretrained = true)
+
+function SSD300(;platform = "CLUSTER", pretrained = false)
     
+
     if pretrained == false
         if platform == "CLUSTER"
             # Knet model but CPU weights Array32 type
@@ -358,6 +398,7 @@ function SSD300(platform = "CLUSTER", pretrained = true)
         elseif platform == "CPU"
             torch_model = readBinaryTorchModel("vgg16.bin")
             # Data Reading Code Should be added
+
             vgg16 = VGG16(torch_model)
         end
 
@@ -365,21 +406,32 @@ function SSD300(platform = "CLUSTER", pretrained = true)
         ssdHeads = SSDheads(n_boxes,n_classes)
 
         priors_cxcy = create_prior_boxes()
-        #rescale_factor = Float32(20.0)
-        rescale_factor = Param(zeros(1,1,512,1).=20)
+        rescale_factor = Float32(20.0)
+
+        return SSD300(vgg16,auxHeads,ssdHeads, priors_cxcy,rescale_factor,platform)
         
-    else
-        pretrained_vgg16 =  pretrained_VGG()
-        pretrained_auxHeads = pretrained_AuxiliaryHeads()
-        pretrained_ssdHeads =  pretrained_SSDheads(n_classes = 21)
-          
-        rescale_factor = getweight_rescale_pytorch()
+        
+    elseif pretrained== true
+        
+        println("Pretrained constructor is called")
+        ssd_300_pretrained_weights = load("/kuacc/users/ckoksal20/ssd300_pretrained_weights.jld")
+        ssd_300_pretrained_weights = ssd_300_pretrained_weights["model"]
+        
+        
+        pretrained_vgg16 =  pretrained_VGG_(ssd_300_pretrained_weights)
+        pretrained_auxHeads = pretrained_AuxiliaryHeads(ssd_300_pretrained_weights)
+        pretrained_ssdHeads =  pretrained_SSDheads(n_classes = 21,ssd_300_pretrained_weights)
+        
+        #rescale_factor = Float32(mean(model["rescale_factors"]))
+        
+        rescale_factor = getweight_rescale_pytorch(ssd_300_pretrained_weights["rescale_factors"])
         priors_cxcy = create_prior_boxes()
         
         return SSD300(pretrained_vgg16, pretrained_auxHeads, pretrained_ssdHeads,priors_cxcy,rescale_factor,platform) 
+        
     end
-
-    return SSD300(vgg16,auxHeads,ssdHeads, priors_cxcy,rescale_factor,platform)
+        
+        
     
 end
 
@@ -391,8 +443,8 @@ function(ssd300::SSD300)(x)
     norm = (sum(conv4_3_feats.^2,dims=3).^(1/2))
     conv4_3_feats = conv4_3_feats ./ norm
     
-    println("size(conv4_3_feats",size(conv4_3_feats))
-    println("size(rescale_factor",size(ssd300.rescale_factor))
+    #println("size(conv4_3_feats",size(conv4_3_feats))
+    #println("size(rescale_factor",size(ssd300.rescale_factor))
     conv4_3_feats = conv4_3_feats .* ssd300.rescale_factor
     
     
@@ -401,12 +453,12 @@ function(ssd300::SSD300)(x)
 
     locs, classes_scores = ssd300.heads(conv4_3_feats, conv7_feats, conv8_2_feats, conv9_2_feats, conv10_2_feats, conv11_2_feats)
     
-    println("size(conv4_3_feats",size(conv4_3_feats))
-    println("size(conv7_feats",size(conv7_feats))
-    println("size(conv8_2_feats",size(conv8_2_feats))
-    println("size(conv9_2_feats",size(conv9_2_feats))
-    println("size(conv10_2_feats",size(conv10_2_feats))
-    println("size(conv11_2_feats",size(conv11_2_feats))
+    #println("size(conv4_3_feats",size(conv4_3_feats))
+    ##println("size(conv7_feats",size(conv7_feats))
+    #println("size(conv8_2_feats",size(conv8_2_feats))
+    #println("size(conv9_2_feats",size(conv9_2_feats))
+    #println("size(conv10_2_feats",size(conv10_2_feats))
+    #println("size(conv11_2_feats",size(conv11_2_feats))
 
 
     return locs,classes_scores 
@@ -431,8 +483,8 @@ function(ssd300::SSD300)(x,boxes,labels)
     forward_loss = loss_forward(predicted_locs, predicted_scores, boxes, labels,atype,ssd300.priors_cxcy)
     weight_dec_loss = weightDecayLoss(ssd300)
     #println(weight_dec_loss)
-    #return weight_dec_loss + forward_loss
-    return forward_loss
+    return weight_dec_loss + forward_loss
+    #return forward_loss
 end
 
 

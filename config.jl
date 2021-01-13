@@ -9,6 +9,9 @@ using  Images;
 using CUDA,ArgParse, DataStructures
 using Statistics
 using Dates
+using CUDA
+using HDF5, JLD
+
 
 using Random
 import Base: length, size, iterate, eltype, IteratorSize, IteratorEltype, haslength, @propagate_inbounds, repeat, rand, tail
@@ -33,7 +36,6 @@ const validation_VOC2012 = "$main_path_train_VOC2012/val.txt"
 const annotation_path_test_VOC2012 = "/datasets/pascal_voc2012/Test/VOCdevkit/VOC2012/Annotations"
 const images_path_test_VOC2012 = "/datasets/pascal_voc2012/Test/VOCdevkit/VOC2012/JPEGImages"
 const main_path_test_VOC2012 = "/datasets/pascal_voc2012/Test/VOCdevkit/VOC2012/ImageSets/Main"
-
 const test_VOC2012 = "$main_path_test_VOC2012/test.txt"
 
 const images_path_trainval_VOC2007 = "/kuacc/users/ckoksal20/VOCdevkit/VOC2007/JPEGImages"

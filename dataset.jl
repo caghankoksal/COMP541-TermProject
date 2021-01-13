@@ -11,11 +11,13 @@ function readIndex(indices,annotation_path,images_path,split; augmentation = tru
     labels = []
     difficulties = []
     
+    println(indices)
     #TODO parallel reading
     for idx in indices
         #for idx in indices
         bounding_box, label, diff= creteBBobject("$annotation_path/$idx.xml")
         
+        println("Labels: ",label)
         # Reads Image
         img = readImage("$images_path/$idx.jpg")
         
@@ -30,7 +32,7 @@ function readIndex(indices,annotation_path,images_path,split; augmentation = tru
         push!(difficulties,new_difficulties)
     end
     x = cat(x...,dims=4)
-    x = permutedims(x,(2,3,1,4))
+    x = permutedims(x,(3,2,1,4))
     #println("Dtype ",dtype)
     x = dtype(x)
     return (x,bounding_boxes,labels) 
@@ -60,7 +62,18 @@ struct PascalVOC
 
     function PascalVOC(indices_path, annotation_path, images_path,split ; batchsize::Int=8, shuffle::Bool=false, augmentation = true,dtype::Type=Array{Float32})
         
+
+        if indices_path == test_VOC2012
+            xmlFiles = readdir(annotation_path)
+            indices = [replace(el,".xml"=>"") for el in xmlFiles ]
+        
+            indices = filter!(e->e != [".2011_004297.xml.swp",".2011_004297.swp",".2011_004297.swp"],indices)
+        
+        else
         indices = readlines(indices_path) 
+        
+        end
+        
         numInstance = size(indices,1)
         
         return new(indices,batchsize,shuffle,numInstance,augmentation,split, annotation_path,images_path,dtype )

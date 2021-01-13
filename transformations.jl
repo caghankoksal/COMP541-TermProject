@@ -7,7 +7,7 @@ function readImage(img_path)
     
     img = load(img_path)
     img_CHW = channelview(img) # 3*375*500
-    img_CHW = convert(Array{Float32}, img_CHW)
+    img_CHW = convert(Array{Float64}, img_CHW)
     
     return img_CHW
 end
@@ -84,7 +84,7 @@ function  saturationDistortion(image; lower=0.5, upper=1.5)
 
     #Back to RGB
     img =  channelview(colorview(RGB, img))
-    img = Array{Float32}(img)
+    img = Array{Float64}(img)
     return img
 
 end
@@ -171,18 +171,18 @@ function transformation(image,boxes,labels, difficulties, split)
     if split == "TRAIN"
         
         # applies photometric distortion
-        new_image = photometric_distortion(new_image)
+        #new_image = photometric_distortion(new_image)
         
         
         if rand() < 0.5
-            new_image, new_boxes = expand(new_image, new_boxes, mean ; max_scale = 4)
+            #new_image, new_boxes = expand(new_image, new_boxes, mean ; max_scale = 4)
         end
         
-        new_image, new_boxes, new_labels, new_difficulties = random_crop(new_image, new_boxes, new_labels, new_difficulties)
+        #new_image, new_boxes, new_labels, new_difficulties = random_crop(new_image, new_boxes, new_labels, new_difficulties)
         
         if rand() < 0.5
             #returns channelview
-            new_image, new_boxes = horizontalFlips(new_image, new_boxes)
+            #new_image, new_boxes = horizontalFlips(new_image, new_boxes)
         end
     end
     
@@ -194,7 +194,7 @@ function transformation(image,boxes,labels, difficulties, split)
 
 
     
-    #new_image = normalize(new_image, mean, std)
+    new_image = normalize(new_image, mean, std)
     #println("Lastly",new_boxes)
     return new_image, new_boxes, new_labels, new_difficulties
 end
@@ -230,7 +230,7 @@ function resize(image, boxes; dims=(300, 300), return_percent_coords=true)
 
     #new_boxes =  floor.(new_boxes)
     new_image = channelview(new_image)
-    new_image = Array{Float32}(new_image)
+    new_image = Array{Float64}(new_image)
 
     return new_image, new_boxes
 end
