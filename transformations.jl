@@ -171,18 +171,18 @@ function transformation(image,boxes,labels, difficulties, split)
     if split == "TRAIN"
         
         # applies photometric distortion
-        #new_image = photometric_distortion(new_image)
+        new_image = photometric_distortion(new_image)
         
         
         if rand() < 0.5
-            #new_image, new_boxes = expand(new_image, new_boxes, mean ; max_scale = 4)
+            new_image, new_boxes = expand(new_image, new_boxes, mean ; max_scale = 4)
         end
         
-        #new_image, new_boxes, new_labels, new_difficulties = random_crop(new_image, new_boxes, new_labels, new_difficulties)
+        new_image, new_boxes, new_labels, new_difficulties = random_crop(new_image, new_boxes, new_labels, new_difficulties)
         
         if rand() < 0.5
             #returns channelview
-            #new_image, new_boxes = horizontalFlips(new_image, new_boxes)
+            new_image, new_boxes = horizontalFlips(new_image, new_boxes)
         end
     end
     

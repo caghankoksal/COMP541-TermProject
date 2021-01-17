@@ -1,6 +1,6 @@
 include("config.jl")
 
-function readIndex(indices,annotation_path,images_path,split; augmentation = true, dtype=Array{Float32} )
+function readIndex(indices,annotation_path,images_path,split; augmentation = true, dtype=Array{Float32}, whichDataset = [] )
     
     """
     Read the data with given indices.
@@ -11,15 +11,31 @@ function readIndex(indices,annotation_path,images_path,split; augmentation = tru
     labels = []
     difficulties = []
     
-    println(indices)
+    
+    #println("Annotation path", annotation_path)
+    #println("images_path", images_path)
+    
+    #println("which dataset", whichDataset)
+    
     #TODO parallel reading
-    for idx in indices
-        #for idx in indices
-        bounding_box, label, diff= creteBBobject("$annotation_path/$idx.xml")
+    for (i,idx) in enumerate(indices)
         
-        println("Labels: ",label)
+        #for idx in indices
+        
+        if whichDataset != []
+            curAnnPath = annotation_path[whichDataset[i]]
+            curImagesPath = images_path[whichDataset[i]]
+        else
+            curAnnPath = annotation_path
+            curImagesPath = images_path
+        end
+        
+        
+        bounding_box, label, diff= creteBBobject("$curAnnPath/$idx.xml")
+        
+        #println("Labels: ",label)
         # Reads Image
-        img = readImage("$images_path/$idx.jpg")
+        img = readImage("$curImagesPath/$idx.jpg")
         
         new_image, new_boxes, new_labels, new_difficulties = transformation(img,bounding_box,label, diff, split)
         
@@ -35,7 +51,7 @@ function readIndex(indices,annotation_path,images_path,split; augmentation = tru
     x = permutedims(x,(3,2,1,4))
     #println("Dtype ",dtype)
     x = dtype(x)
-    return (x,bounding_boxes,labels) 
+    return (x,bounding_boxes,labels,difficulties) 
 end
 
 
@@ -49,6 +65,7 @@ Create a PascalVOC object, where `indices` is unique values for data points,
 "augmentation" indicates  applying  augmentation or not
 "split" "TRAIN" or "TEST" if split is "TRAIN" --> augmentation is applied
 """
+
 struct PascalVOC
     indices
     batchsize::Int
@@ -59,26 +76,45 @@ struct PascalVOC
     annotation_path
     images_path
     dtype
-
-    function PascalVOC(indices_path, annotation_path, images_path,split ; batchsize::Int=8, shuffle::Bool=false, augmentation = true,dtype::Type=Array{Float32})
-        
-
-        if indices_path == test_VOC2012
-            xmlFiles = readdir(annotation_path)
-            indices = [replace(el,".xml"=>"") for el in xmlFiles ]
-        
-            indices = filter!(e->e != [".2011_004297.xml.swp",".2011_004297.swp",".2011_004297.swp"],indices)
-        
-        else
-        indices = readlines(indices_path) 
-        
-        end
-        
-        numInstance = size(indices,1)
-        
-        return new(indices,batchsize,shuffle,numInstance,augmentation,split, annotation_path,images_path,dtype )
-    end
+    multi_dataset::Bool
+    whichDataset::Array
 end
+    
+function PascalVOC(indices_path, annotation_path, images_path,split ; batchsize::Int=8, shuffle::Bool=false,
+    augmentation = true,dtype::Type=Array{Float32}, multi_dataset = false)
+
+
+    indices = []
+    whichDataset = []
+
+    if indices_path == test_VOC2012
+        xmlFiles = readdir(annotation_path)
+        indices = [replace(el,".xml"=>"") for el in xmlFiles ]
+        indices = filter!(e->e != [".2011_004297.xml.swp",".2011_004297.swp",".2011_004297.swp"],indices)
+
+    elseif multi_dataset == true 
+    # Assert whether indices_path, annotation_path, images_path == Array)
+
+        for (i,p) in enumerate(indices_path)
+            curIndices = readlines(p)
+            push!(indices,curIndices )
+            push!(whichDataset, repeat([i], size(curIndices,1)))
+
+        end
+        indices = vcat(indices...)
+        whichDataset = vcat(whichDataset...)
+        whichDataset = vcat(whichDataset...)
+
+    else
+    indices = readlines(indices_path) 
+    end
+
+    numInstance = size(indices,1)
+
+    return PascalVOC(indices,batchsize,shuffle,numInstance,augmentation,split, annotation_path,
+    images_path, dtype, multi_dataset, whichDataset )
+end
+
 
 
 function length(voc::PascalVOC)
@@ -107,12 +143,16 @@ function iterate(data::PascalVOC, state=ifelse(
     if size(state,1)== 0
         return nothing
     elseif size(state,1) < bs
-        (x,bounding_boxes,labels)  = readIndex(X[state[1:end]], annotation_path, img_path, data.split, dtype = data.dtype  )
+        #(x,bounding_boxes,labels,difficulties)  = readIndex(X[state[1:end]], annotation_path, img_path, data.split, dtype = #data.dtype)
         #return ((x,bounding_boxes,labels), [])
         return nothing
     else
-        (x,bounding_boxes,labels)  = readIndex(X[state[1:bs]], annotation_path, img_path,data.split, dtype = data.dtype  )
-        return((x,bounding_boxes,labels), state[bs+1:end])
+        if data.whichDataset != []
+            (x,bounding_boxes,labels,difficulties)  = readIndex(X[state[1:bs]], annotation_path, img_path,data.split, dtype = data.dtype, whichDataset =  data.whichDataset[state[1:bs]] )
+        else
+            (x,bounding_boxes,labels,difficulties)  = readIndex(X[state[1:bs]], annotation_path, img_path,data.split, dtype = data.dtype)
+        end
+        return((x,bounding_boxes,labels,difficulties), state[bs+1:end])
     end
 end
 

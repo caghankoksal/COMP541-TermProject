@@ -82,28 +82,35 @@ end
 mutable struct VGG16  firstlayers; secondlayers; end;
 
 
-function VGG16(torch_model)
+function VGG16(torch_model; train_the_weights = true )
 
     layer_1 = Chain([
-        Conv(getweight(torch_model, layer_names["conv1_1"])..., f=relu, pool_ws = 1,trainable = true )
-        Conv(getweight(torch_model,layer_names["conv1_2"])..., f=relu, pool_ws = 2,trainable = true )
-        Conv(getweight(torch_model,layer_names["conv2_1"])..., f=relu, pool_ws = 1,trainable = true )
-        Conv(getweight(torch_model,layer_names["conv2_2"])..., f=relu, pool_ws = 2,trainable = false )
-        Conv(getweight(torch_model,layer_names["conv3_1"])..., f=relu, pool_ws = 1,trainable = true )
-        Conv(getweight(torch_model,layer_names["conv3_2"])..., f=relu, pool_ws = 1,trainable = true )
-        Conv(getweight(torch_model,layer_names["conv3_3"])..., f=relu, pool_ws = 2, pool_pad = 1,trainable = true )
-        Conv(getweight(torch_model,layer_names["conv4_1"])..., f=relu, pool_ws = 1,trainable = true )
-        Conv(getweight(torch_model,layer_names["conv4_2"])..., f=relu, pool_ws = 1,trainable = true )
-        Conv(getweight(torch_model,layer_names["conv4_3"])..., f=relu, pool_ws = 1,trainable = true )
+        Conv(getweight_pytorch(layer_names["conv1_1"],torch_model)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+        Conv(getweight_pytorch(layer_names["conv1_2"],torch_model)..., f=relu, pool_ws = 2,trainable = train_the_weights ),
+        Conv(getweight_pytorch(layer_names["conv2_1"] ,torch_model)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+        Conv(getweight_pytorch(layer_names["conv2_2"],torch_model)..., f=relu, pool_ws = 2,trainable = train_the_weights ),
+        Conv(getweight_pytorch(layer_names["conv3_1"],torch_model)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+        Conv(getweight_pytorch(layer_names["conv3_2"],torch_model)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+            
+        
+        Conv(getweight_pytorch(layer_names["conv3_3"],torch_model)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+        PoolLayer(custom_padding = true),    
+        #Conv(getweight_pytorch(layer_names["conv3_3"],torch_model)..., f=relu, pool_ws = 2, pool_pad = 1,trainable = true ),
+            
+        Conv(getweight_pytorch(layer_names["conv4_1"],torch_model)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+        Conv(getweight_pytorch(layer_names["conv4_2"],torch_model)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+        Conv(getweight_pytorch(layer_names["conv4_3"],torch_model)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
     ])
     layer_2 = Chain([
-        PoolLayer(0),
-        Conv(getweight(torch_model,layer_names["conv5_1"])..., f=relu, pool_ws = 1,trainable = true ),
-        Conv(getweight(torch_model,layer_names["conv5_2"])..., f=relu, pool_ws = 1,trainable = true ),
-        Conv(getweight(torch_model,layer_names["conv5_3"])..., f=relu, pool_ws = 3, pool_stride = 1, pool_pad=1 ,trainable = true),
+        PoolLayer(window =2, stride=2, custom_padding = false ),
+        Conv(getweight_pytorch(layer_names["conv5_1"],torch_model)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+        Conv(getweight_pytorch(layer_names["conv5_2"],torch_model)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+        Conv(getweight_pytorch(layer_names["conv5_3"],torch_model)..., f=relu, pool_ws = 3, pool_stride = 1, pool_pad=1 ,trainable = train_the_weights),
         
-        Conv(getweight(torch_model,layer_names["conv6"],layer_type="dense")..., pool_ws = 1, f=relu,pad=6, dilation=6),
-        Conv(getweight(torch_model,layer_names["conv7"],layer_type="dense")..., pool_ws = 1, f=relu, pad=0)
+        Conv(getweight_pytorch(layer_names["conv6"],torch_model,layer_type="fc")..., pool_ws = 1, f=relu,pad=6, dilation=6,
+                trainable = train_the_weights),
+        Conv(getweight_pytorch(layer_names["conv7"],torch_model,layer_type="fc")..., pool_ws = 1, f=relu, pad=0,
+            trainable = train_the_weights)
         ])
 
     return VGG16(layer_1,layer_2)
@@ -310,27 +317,35 @@ function getWeightFromKnetForSecondlayers(model::VGG16,index)
     
 end 
 
+
+
 # Converts Pytorch Weights to the Knet Conv shape
-function getweight_pytorch(layer_name,model;atype = atype)
+function getweight_pytorch(layer_name,model; layer_type = "conv", atype = atype)
     
-    #
-    #model = ssd_300_pretrained_weights["model"]
     
     weight_layer_name = "$layer_name.weight"
     bias_layer_name = "$layer_name.bias"
-    
+
     weights =  model[weight_layer_name]
     bias = model[bias_layer_name]
+    if layer_type == "conv"
+        #
+        #model = ssd_300_pretrained_weights["model"]
+        weights = permutedims(weights ,(4,3,2,1))
+        weights = reverse(weights,dims=1)
+        weights = reverse(weights,dims = 2)
 
-    weights = permutedims(weights ,(4,3,2,1))
-    weights = reverse(weights,dims=1)
-    weights = reverse(weights,dims = 2)
-
-    
-    n_output_bias = size(bias,1)
-    bias = reshape(bias,(1,1,n_output_bias,1))
-    return atype(weights),atype(bias)
+        n_output_bias = size(bias,1)
+        bias = reshape(bias,(1,1,n_output_bias,1))
+        return atype(weights),atype(bias)
         
+    elseif layer_type == "fc"
+        
+       weights, bias = denseToConv(weights,bias)
+       return atype(weights),atype(bias)
+    end
+        
+
 end
 
 
@@ -383,32 +398,63 @@ function readBinaryTorchModel(model_path)
 end
 
 
-mutable struct SSD300 VGG; auxilaryLayer; heads; priors_cxcy; rescale_factor; platform;  end
+function  pretrained_VGG_baseline(pretrained_vgg_base,train_the_weights = true)
+
+    layer_1 = Chain([
+        Conv(getweight_pytorch("conv1_1",pretrained_vgg_base)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+        Conv(getweight_pytorch("conv1_2",pretrained_vgg_base)..., f=relu, pool_ws = 2,trainable = train_the_weights ),
+        Conv(getweight_pytorch("conv2_1",pretrained_vgg_base)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+        Conv(getweight_pytorch("conv2_2",pretrained_vgg_base)..., f=relu, pool_ws = 2,trainable = train_the_weights ),
+        Conv(getweight_pytorch("conv3_1",pretrained_vgg_base)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+        Conv(getweight_pytorch("conv3_2",pretrained_vgg_base)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+        Conv(getweight_pytorch("conv3_3",pretrained_vgg_base)..., f=relu, pool_ws = 2, pool_pad = 1,trainable = train_the_weights ),
+        #Conv(getweight_pytorch("conv3_3",pretrained_vgg_base)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+        #PoolLayer(custom_padding = true),
+        
+        Conv(getweight_pytorch("conv4_1",pretrained_vgg_base)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+        Conv(getweight_pytorch("conv4_2",pretrained_vgg_base)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+        Conv(getweight_pytorch("conv4_3",pretrained_vgg_base)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+    ])
+    layer_2 = Chain([
+        PoolLayer(window =2, stride=2, custom_padding = false ),
+        Conv(getweight_pytorch("conv5_1",pretrained_vgg_base)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+        Conv(getweight_pytorch("conv5_2",pretrained_vgg_base)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+        Conv(getweight_pytorch("conv5_3",pretrained_vgg_base)..., f=relu, pool_ws = 3, pool_stride = 1, pool_pad=1 ,trainable = train_the_weights),
+        Conv(getweight_pytorch("conv6",pretrained_vgg_base)..., pool_ws = 1, f=relu,pad=6, dilation=6,trainable = train_the_weights),
+        Conv(getweight_pytorch("conv7",pretrained_vgg_base)..., pool_ws = 1, f=relu, pad=0,trainable = train_the_weights)
+        ])
+    
+    vgg = VGG16(layer_1,layer_2)
+    return vgg
+end
 
 
-function SSD300(;platform = "CLUSTER", pretrained = false)
+
+mutable struct SSD300 VGG; auxilaryLayer; heads; priors_cxcy; rescale_factor;  end
+
+
+function SSD300(; pretrained = false)
     
 
     if pretrained == false
-        if platform == "CLUSTER"
-            # Knet model but CPU weights Array32 type
-            vgg16 = Knet.load("/kuacc/users/ckoksal20/vgg16.jld2", "vgg16")
-            # convert CPU weight to GPU weights
-            vgg16 = CPU_weights_ToGpu(vgg16)
-        elseif platform == "CPU"
-            torch_model = readBinaryTorchModel("vgg16.bin")
-            # Data Reading Code Should be added
-
-            vgg16 = VGG16(torch_model)
-        end
+        
+        println("Only New Pretrained VGG16 constructor is called")
+        
+        ssd_300_pretrained_weights = load("/kuacc/users/ckoksal20/vgg16_pretrained_pytorch.jld")
+        vgg16 = VGG16(ssd_300_pretrained_weights["vgg16"])
+        
+        
+        #VGG_pretrained_weights = load("/kuacc/users/ckoksal20/vgg16_base.jld")
+        #pretrained_vgg_base= VGG_pretrained_weights["vgg16"]
+        #vgg16 = pretrained_VGG_baseline(pretrained_vgg_base,true)
 
         auxHeads = AuxiliaryHeads()
         ssdHeads = SSDheads(n_boxes,n_classes)
 
         priors_cxcy = create_prior_boxes()
-        rescale_factor = Float32(20.0)
+        rescale_factor = Param(atype(ones(1,1,512,1).*20))
 
-        return SSD300(vgg16,auxHeads,ssdHeads, priors_cxcy,rescale_factor,platform)
+        return SSD300(vgg16,auxHeads,ssdHeads, priors_cxcy,rescale_factor)
         
         
     elseif pretrained== true
@@ -427,7 +473,7 @@ function SSD300(;platform = "CLUSTER", pretrained = false)
         rescale_factor = getweight_rescale_pytorch(ssd_300_pretrained_weights["rescale_factors"])
         priors_cxcy = create_prior_boxes()
         
-        return SSD300(pretrained_vgg16, pretrained_auxHeads, pretrained_ssdHeads,priors_cxcy,rescale_factor,platform) 
+        return SSD300(pretrained_vgg16, pretrained_auxHeads, pretrained_ssdHeads,priors_cxcy,rescale_factor) 
         
     end
         
@@ -445,8 +491,8 @@ function(ssd300::SSD300)(x)
     
     #println("size(conv4_3_feats",size(conv4_3_feats))
     #println("size(rescale_factor",size(ssd300.rescale_factor))
+    #conv4_3_feats = conv4_3_feats .* ssd300.rescale_factor
     conv4_3_feats = conv4_3_feats .* ssd300.rescale_factor
-    
     
 
     conv8_2_feats, conv9_2_feats, conv10_2_feats, conv11_2_feats = ssd300.auxilaryLayer(conv7_feats)
@@ -470,6 +516,8 @@ function weightDecayLoss(ssd300::SSD300, lambda = 5e-4 )
         #weight_decay_loss += lambda*sum((param.value).^2)
         weight_decay_loss += lambda*sum((param).^2)
     end
+    
+    #println("Weight Decay : ",weight_decay_loss)
     return weight_decay_loss
     
 end
@@ -488,8 +536,9 @@ function(ssd300::SSD300)(x,boxes,labels)
 end
 
 
-function(ssd300::SSD300)(dataset::PascalVOC; iterate =5)
+function(ssd300::SSD300)(dataset::PascalVOC; iterate =10)
     
+    println("Dataset Loss is being calculated")
     numberOfBatch = length(dataset)
     
     loss = 0

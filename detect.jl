@@ -1,10 +1,21 @@
-function detect_objects(predicted_locs, predicted_scores; min_score = 0.2 , max_overlap = 0.5, top_k = 200)
-    """
+"""
+Inputs:
+
     predicted_locs :8732×4×32 KnetArray{Float32,3}:
     predicted_scores : 8732×21×32 KnetArray{Float32,3}:
+    min_score = 0.2 ,
+    max_overlap = 0.5,
+    top_k = 200
+
+Output:
+
+    all_images_boxes,
+    all_images_labels,
+    all_images_scores  # lists of length batch_size
     
-    
-    """
+"""
+function detect_objects(predicted_locs, predicted_scores; min_score = 0.2 , max_overlap = 0.5, top_k = 200)
+
     #predicted_locs = permutedims(predicted_locs,(2,1,3))
     #predicted_scores = permutedims(predicted_scores,(2,1,3))
     #println("Number of classes",n_classes)
@@ -78,10 +89,6 @@ function detect_objects(predicted_locs, predicted_scores; min_score = 0.2 , max_
             push!(image_scores, class_scores[Bool.(1 .- suppress)])
             
             
-        #println("image_boxes class",size(image_boxes))
-        #println("image_labels class",size(image_labels))
-        #println("image_scores class",size(image_scores))
-            
         end
         
         
@@ -104,22 +111,32 @@ function detect_objects(predicted_locs, predicted_scores; min_score = 0.2 , max_
         
         # Concatenate into single tensors
         #println(size(image_boxes))
-        image_boxes = vcat(image_boxes)  # (n_objects, 4)
-        image_labels = vcat(image_labels)  # (n_objects)
-        image_scores = vcat(image_scores)  # (n_objects)
+        image_boxes = vcat(image_boxes...)  # (n_objects, 4)
+        image_labels = vcat(image_labels...)  # (n_objects)
+        image_scores = vcat(image_scores...)  # (n_objects)
+        
+        #println("Size image boxes : ",size(image_boxes))
+        #println("Size image_labels: ",size(image_labels))
+        #println("Size image scores  : ",size(image_scores))
         n_objects = size(image_scores,1)
         #println("N objects",n_objects)
         #println("Size image_scores",size(image_scores))
         
         #Keep only the top k objects
         if n_objects > top_k
+            #println("Top k : ",top_k)
+            
             sort_ind = sortperm(image_scores, rev = true)
             image_scores = image_scores[sort_ind] 
 
             image_scores = image_scores[1:top_k]  # (top_k)
-            image_boxes = image_boxes[sort_ind,:][1:top_k]  # (top_k, 4)
+            image_boxes = image_boxes[sort_ind,:][1:top_k,:]  # (top_k, 4)
             image_labels = image_labels[sort_ind][1:top_k]  # (top_k)
         end
+        #println("Size image boxes : ",size(image_boxes))
+        #println("Size image_labels: ",size(image_labels))
+        #println("Size image scores  : ",size(image_scores))
+        
         # Append to lists that store predicted boxes and scores for all images
             
         push!(all_images_boxes, image_boxes)

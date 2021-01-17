@@ -11,7 +11,7 @@ using Statistics
 using Dates
 using CUDA
 using HDF5, JLD
-
+using OrderedCollections
 
 using Random
 import Base: length, size, iterate, eltype, IteratorSize, IteratorEltype, haslength, @propagate_inbounds, repeat, rand, tail

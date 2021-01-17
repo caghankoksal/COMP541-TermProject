@@ -306,11 +306,11 @@ function loss_forward(predicted_locs, predicted_scores, boxes, labels,atype,prio
     
     # LOCALIZATION LOSS
     # Localization loss is computed only over positive (non-background) priors
-    #loc_loss = l1_loss(predicted_locs,true_locs,positive_indices,n_positives )  # (), scalar
+    loc_loss = l1_loss(predicted_locs,true_locs,positive_indices,n_positives )  # (), scalar
     
     #smooth l1 
-    lower_indices, higher_indices = smooth_l1_loss_index(predicted_locs, true_locs,positive_indices)
-    loc_loss = smooth_l1_loss(predicted_locs, true_locs,positive_indices,lower_indices,higher_indices,n_positives)
+    #lower_indices, higher_indices = smooth_l1_loss_index(predicted_locs, true_locs,positive_indices)
+    #loc_loss = smooth_l1_loss(predicted_locs, true_locs,positive_indices,lower_indices,higher_indices,n_positives)
     #println("Localization loss", loc_loss)
     
     
@@ -335,12 +335,12 @@ function loss_forward(predicted_locs, predicted_scores, boxes, labels,atype,prio
     positiveIndices, hardestNegIndices, positiveTotal = findIndex_development(predicted_scores,true_classes;negativeRatio = neg_pos_ratio)
     confidenceLoss = calculateNLLoss(predicted_scores, true_classes, positiveIndices, hardestNegIndices, positiveTotal)
     
-  
+    #println("Number offf posssitives", n_positives)
     conf_loss = confidenceLoss/n_positives
     total_loss = loc_loss  + conf_loss   
     
     
-    println("Total loss : ",total_loss," Localization Loss : ",loc_loss, " Confidence Loss :",conf_loss)
+    #println("Total loss : ",total_loss," Localization Loss : ",loc_loss, " Confidence Loss :",conf_loss)
     
     #println("Localization Loss : ",loc_loss)
 return total_loss      
@@ -367,8 +367,15 @@ function calculateNLLoss(predicted_scores, true_classes, positiveIndices, hardes
     
     totalLoss = 0
     #            nll does not calculate loss on 0 indices, by converting hard negative indices to 1, loss can be calculated
+    
+    
+    #println("NLL predicted_scores size", size(predicted_scores))
+    #println("NLL true_classes size", size(true_classes))
+    
+    
     for i in 1:batch_size
-        itemLoss = nll(predicted_scores[:,:,i], Integer.(true_classes[i,:]),dims=1,average=false) 
+        itemLoss = nll(predicted_scores[:,:,i], Integer.(true_classes[i,:]),dims=1,average=false)
+        #println(itemLoss)
         totalLoss += itemLoss[1]
     end
     return totalLoss
@@ -389,6 +396,8 @@ function findIndex_development(predicted_scores,true_classes;negativeRatio = 3)
     hardestNegIndices = []
     positiveIndices = []
     
+    #println("findIndex_development", size(predicted_scores2)) (21, 8732, 4)
+    
     positiveTotal = 0
     for i in 1:batch_size
         #println(" TRUE CLASSES == 1", findall(x-> x==1, true_classes[i,:]))
@@ -408,6 +417,8 @@ function findIndex_development(predicted_scores,true_classes;negativeRatio = 3)
         
         #Smallest Background scores for the background object will give the the most errorous classification for background.
         hard_indices =  sortperm(negative_values_scores_background)[1:n_negative]
+        hard_indices = negative_indices[hard_indices]
+        
         push!(hardestNegIndices,hard_indices)
         push!(positiveIndices,positive_indices)
     end

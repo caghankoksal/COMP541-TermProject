@@ -7,6 +7,7 @@ function  pretrained_VGG_(pretrained_weights, train_the_weights = true)
         Conv(getweight_pytorch("base.conv2_2",pretrained_weights)..., f=relu, pool_ws = 2,trainable = train_the_weights ),
         Conv(getweight_pytorch("base.conv3_1",pretrained_weights)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
         Conv(getweight_pytorch("base.conv3_2",pretrained_weights)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
+        
         #Conv(getweight_pytorch("base.conv3_3")..., f=relu, pool_ws = 2, pool_pad = 1,trainable = train_the_weights ),
         Conv(getweight_pytorch("base.conv3_3",pretrained_weights)..., f=relu, pool_ws = 1,trainable = train_the_weights ),
         PoolLayer(custom_padding = true),

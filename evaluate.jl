@@ -1,5 +1,68 @@
 
-function mAP(det_boxes, det_labels, det_scores, true_boxes, true_labels)
+function evaluate(test_dataset, model; min_score = 0.01, max_overlap = 0.45, top_k = 200)
+    """
+    Evaluate.
+    :param test_loader: DataLoader for test data
+    :param model: model
+    """
+
+    # Lists to store detected and true boxes, labels, scores
+    det_boxes = []
+    det_scores = []
+    det_labels= []
+    true_boxes = []
+    true_labels = []
+    true_difficulties = [] 
+
+   
+        # Batches
+        for (i, (images, boxes, labels, difficulties)) in enumerate(test_dataset)
+            
+            println(" Iteration : ",i)
+            # Forward prop.
+            predicted_locs, predicted_scores = model(images)
+
+            # Detect objects in SSD output
+        
+            
+            det_boxes_batch, det_labels_batch, det_scores_batch = detect_objects(predicted_locs, 
+            predicted_scores,
+            min_score = min_score, 
+            max_overlap = max_overlap,
+            top_k = top_k)
+        
+     
+            
+
+            push!(det_boxes, det_boxes_batch)
+            push!(det_labels, det_labels_batch)
+            push!(det_scores, det_scores_batch)
+            push!(true_boxes, boxes)
+            push!(true_labels, labels)
+            push!(true_difficulties,difficulties)
+            
+        
+            #push!(true_difficulties, difficulties)
+        end
+        # Calculate mAP
+        #det_boxes = cat(det_boxes...,dims=1)
+        det_labels = cat(det_labels...,dims=1)
+        det_scores = cat(det_scores...,dims=1)
+        true_boxes = cat(true_boxes...,dims=1)
+        true_labels = cat(true_labels...,dims=1)
+        true_difficulties = cat(true_difficulties...,dims=1)
+    
+        APs, mAP = calculate_mAP(det_boxes, det_labels, det_scores, true_boxes, true_labels,true_difficulties)
+
+    # Print AP for each class
+    #println("Average Precisions : ", APs)
+
+    #println("\nMean Average Precision (mAP): $mAP")
+    
+    return APs, mAP 
+end
+
+function calculate_mAP(det_boxes, det_labels, det_scores, true_boxes, true_labels, true_difficulties)
     n_classes = size(collect(class_to_index))[1]
     println("n_classes : ",n_classes)
     
@@ -32,13 +95,16 @@ function mAP(det_boxes, det_labels, det_scores, true_boxes, true_labels)
     det_scores = vcat(det_scores...)
     det_scores = vcat(det_scores...)
     true_labels = vcat(true_labels...)
+    true_difficulties = vcat(true_difficulties...)
     
     println("Size true labels : ",size(true_labels))
+    println("Size true_difficulties :", size(true_difficulties))
     println("Size det_scores : ",size(det_scores))
     println("Size det_labels : ",size(det_labels))
     println("Size det boxes :", size(det_boxes))
     
-    println("True labels ::",true_labels)
+    
+    #println("True labels ::",true_labels)
     
     average_precisions = zeros( n_classes -1)
     average_precisions_ = Dict()
@@ -52,6 +118,19 @@ function mAP(det_boxes, det_labels, det_scores, true_boxes, true_labels)
         true_class_boxes = true_boxes[true_labels .== c,:]  # 9×4 Array{Float64,2}:  
         #println("True_class_boxes" ,true_class_boxes)
         #println("Size True class boxes", size(true_class_boxes))
+        true_class_difficulties = true_difficulties[true_labels .== c]
+        
+        #println("true_class_difficulties : ",true_class_difficulties)
+        n_easy_class_objects = 0
+        try
+            n_easy_class_objects = sum(1 .- true_class_difficulties)
+        catch
+            n_easy_class_objects = 0
+        end
+            
+        
+        #n_easy_class_objects = size((1 .- true_class_difficulties),1)
+        #println("n_easy_class_objects : ",n_easy_class_objects)
             
         num_true_boxes = size(true_class_boxes,1)
         # Keep track of which true objects with this class have already been 'detected'
@@ -89,6 +168,9 @@ function mAP(det_boxes, det_labels, det_scores, true_boxes, true_labels)
             this_image = det_class_images[d] 
             # Find objects in the same image with the same class,  
             object_boxes = true_class_boxes[true_class_images .== this_image,:]
+            object_difficulties = true_class_difficulties[true_class_images .== this_image] 
+            #println(object_difficulties)
+            
             # If that image does not have any bounding box --> There is false positive in here
             if size(object_boxes,1)== 0
                 false_positives[d] = 1
@@ -116,37 +198,42 @@ function mAP(det_boxes, det_labels, det_scores, true_boxes, true_labels)
             # If the maximum overlap is greater than the threshold of 0.5, it's a match
             if max_overlap > 0.5
                     # If this object has already not been detected, it's a true positive
-                #println("HERE AMK")
-
-                #println(true_class_boxes_detected)
-                if true_class_boxes_detected[original_ind] == 0
-                    true_positives[d] = 1
-                    true_class_boxes_detected[original_ind] = 1  # this object has now been detected/accounted for
-                # Otherwise, it's a false positive (since this object is already accounted for)
-                else
-                    false_positives[d] = 1
+                
+                #println("object_difficulties[ind]", object_difficulties[ind])
+                if object_difficulties[ind][1] == 0
+                
+            
+                    #println(true_class_boxes_detected)
+                    if true_class_boxes_detected[original_ind] == 0
+                        true_positives[d] = 1
+                        true_class_boxes_detected[original_ind] = 1  # this object has now been detected/accounted for
+                    # Otherwise, it's a false positive (since this object is already accounted for)
+                    else
+                        false_positives[d] = 1
+                    end
                 end
             # Otherwise, the detection occurs in a different location than the actual object, and is a false positive
             else
                 false_positives[d] = 1
             end
         end
+        
+         
 
-            #println("true_positives",true_positives)
-            #println("Size true positives",size(true_positives))
+            
 
-            #println("True Positives :::",true_positives , "size : ", size(true_positives),"\n")
+           # println("True Positives :::",true_positives , "size : ", size(true_positives),"\n")
             #println("n_class_detections :",n_class_detections)
         
             cumul_true_positives = cumsum(true_positives, dims=1)  # (n_class_detections)
             cumul_false_positives = cumsum(false_positives, dims=1)  # (n_class_detections)
 
-            #println("cumul_true_positives" , cumul_true_positives)
+            #println("cumul_true_positives" , cumul_true_positives,"\n")
             #println("cumul_false_positives",cumul_false_positives)
 
             cumul_precision = cumul_true_positives ./(cumul_true_positives .+ cumul_false_positives .+ 1e-10)  # (n_class_detections)
-            cumul_recall = cumul_true_positives ./ num_true_boxes  # (n_class_detections)
-
+            #cumul_recall = cumul_true_positives ./ num_true_boxes  # (n_class_detections)
+            cumul_recall = cumul_true_positives ./ n_easy_class_objects
             recall_thresholds = collect(0:0.1:1)
         
             
@@ -183,58 +270,3 @@ function mAP(det_boxes, det_labels, det_scores, true_boxes, true_labels)
     return mean_average_precision, average_precisions_
 end
 
-
-function evaluate(test_dataset, model)
-    """
-    Evaluate.
-    :param test_loader: DataLoader for test data
-    :param model: model
-    """
-
-    # Lists to store detected and true boxes, labels, scores
-    det_boxes = []
-    det_scores = []
-    det_labels= []
-    true_boxes = []
-    true_labels = []
-    #true_difficulties = Array()  # it is necessary to know which objects are 'difficult', see 'calculate_mAP' in utils.py
-
-   
-        # Batches
-        for (i, (images, boxes, labels)) in enumerate(test_dataset)
-            
-            println(" Iteration : ",i)
-            # Forward prop.
-            predicted_locs, predicted_scores = model(images)
-
-            # Detect objects in SSD output
-        
-            
-            det_boxes_batch, det_labels_batch, det_scores_batch = detect_objects(predicted_locs, 
-            predicted_scores,
-            min_score=0.01, max_overlap=0.45,top_k=200)
-
-
-            push!(det_boxes, det_boxes_batch)
-            push!(det_labels, det_labels_batch)
-            push!(det_scores, det_scores_batch)
-            push!(true_boxes, boxes)
-            push!(true_labels, labels)
-        
-        
-            #push!(true_difficulties, difficulties)
-        end
-        # Calculate mAP
-        det_boxes = cat(det_boxes...,dims=1)
-        det_labels = cat(det_labels...,dims=1)
-        det_scores = cat(det_scores...,dims=1)
-        true_boxes = cat(true_boxes...,dims=1)
-        true_labels = cat(true_labels...,dims=1)
-    
-        APs, mAP = mAP(det_boxes, det_labels, det_scores, true_boxes, true_labels)
-
-    # Print AP for each class
-    println(APs)
-
-    println("\nMean Average Precision (mAP): $mAP")
-end
