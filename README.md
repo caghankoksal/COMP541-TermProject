@@ -1,2 +1,2 @@
-# COMP541-TermProject
-COMP541-TermProject
+# Single Shot Multibox Detector(SSD) Implementation
+Julia - Knet Implementation of SSD object detector.
