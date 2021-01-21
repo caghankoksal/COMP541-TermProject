@@ -21,7 +21,10 @@ function evaluate(test_dataset, model; min_score = 0.01, max_overlap = 0.45, top
             println(" Iteration : ",i)
             # Forward prop.
             predicted_locs, predicted_scores = model(images)
-
+            
+           
+        
+        
             # Detect objects in SSD output
         
             

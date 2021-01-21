@@ -90,15 +90,15 @@ function boundingBoxToArray(bb)
     
 end
 
-
-function creteBBobject(filename)
-    """
+"""
     Reads and parse the XML file and create Bounding Box object.
-    """
+"""
+function creteBBobject(filename)
+    
     
     #println("Filename", filename)
-    xdoc = parse_file(filename)
-    xroot = root(xdoc)  # an instance of XMLElement
+    #xdoc = 
+    xroot = root(parse_file(filename))  # an instance of XMLElement
     filename = content(xroot["filename"][1])
     bb_array = xroot["object"]
     boxes = []
@@ -106,21 +106,17 @@ function creteBBobject(filename)
     labels = []
     difficulties = []
     
-    bounding_boxes = zeros(num_bb,4) # Xmin,ymin, xmax,ymax
-    
+    #bounding_boxes = zeros(num_bb,4) # Xmin,ymin, xmax,ymax
+    bounding_boxes = []
     
     for (i,bb) in enumerate(bb_array)
         #println(bb)
         #pose = content(find_element(bb, "pose"))
         class = content(find_element(bb, "name"))
-        try
-            difficulty = content(find_element(bb, "difficult"))
-        catch
-            difficulty = "0"
-        end
-            
         
+        difficulty = content(find_element(bb, "difficult"))
         
+
         xmin = content(find_element(find_element(bb, "bndbox"),"xmin"))
         ymin = content(find_element(find_element(bb, "bndbox"),"ymin"))
         xmax  = content(find_element(find_element(bb, "bndbox"),"xmax"))
@@ -141,22 +137,21 @@ function creteBBobject(filename)
         
         push!(difficulties,difficulty)
         push!(labels,class_indx)
-        bounding_boxes[i,:] = [x_min,y_min,x_max,y_max]
-        
+        #bounding_boxes[i,:] = [x_min,y_min,x_max,y_max]
+        push!(bounding_boxes, [x_min y_min x_max y_max])
 
     end
-    free(xdoc)
+    #free(xdoc)
     #return boxes
-    return bounding_boxes,labels,difficulties
+            
+    return vcat(bounding_boxes...),labels,difficulties
 
 end
 
 
 
 
-
-function gcxgcy_to_cxcy(gcxgcy, priors_cxcy)
-    """
+"""
     Decode bounding box coordinates predicted by the model, since they are encoded in the form mentioned above.
     They are decoded into center-size coordinates.
     This is the inverse of the function above.
@@ -165,6 +160,8 @@ function gcxgcy_to_cxcy(gcxgcy, priors_cxcy)
     :return: decoded bounding boxes in center-size form, a tensor of size (n_priors, 4)
     
     """
+function gcxgcy_to_cxcy(gcxgcy, priors_cxcy)
+    
     
     # 10 and 5 can be interpreted as variances of the encoded bounding boxes
     # They are for some sort of numerical conditioning, for 'scaling the localization gradient'
@@ -178,8 +175,7 @@ function gcxgcy_to_cxcy(gcxgcy, priors_cxcy)
     return hcat(centers,width_height)
     
 end
-function cxcy_to_gcxgcy(cxcy, priors_cxcy)
-    """
+"""
     Encode bounding boxes (that are in center-size form) w.r.t. the corresponding prior boxes (that are in center-size form).
     For the center coordinates, find the offset with respect to the prior box, and scale by the size of the prior box.
     For the size coordinates, scale by the size of the prior box, and convert to the log-space.
@@ -190,6 +186,8 @@ function cxcy_to_gcxgcy(cxcy, priors_cxcy)
     :param priors_cxcy: prior boxes with respect to which the encoding must be performed, a tensor of size (n_priors, 4)
     :return: encoded bounding boxes, a tensor of size (n_priors, 4)
     """
+function cxcy_to_gcxgcy(cxcy, priors_cxcy)
+    
 
     # 10 and 5 can be interpreted as variances of the encoded bounding boxes
     # They are for some sort of numerical conditioning, for 'scaling the localization gradient'
@@ -206,20 +204,22 @@ function cxcy_to_gcxgcy(cxcy, priors_cxcy)
     width_height =    log.(cxcy[:, 3:end] ./ priors_cxcy[:, 3:end]) .* 5  # g_w, g_h
     #width_height =  (cxcy[:, 3:end] ./ priors_cxcy[:, 3:end]) .* 5  # g_w, g_h
     
-    priors_cxcy = atype(priors_cxcy)
-    cxcy = atype(cxcy)
+    #priors_cxcy = atype(priors_cxcy)
+    #cxcy = atype(cxcy)
     
     concat = hcat(centers, width_height)
-    return atype(concat)
+    #return atype(concat)
+    return concat
 end
 
-function cxcy_to_xy(cxcy)
-    """
+"""
     Convert bounding boxes from center-size coordinates centerx, centery, width, height)
     to boundary coordinates  (xmin ymin xmax ymax)
     :cxcy: bounding boxes in center-size coordinates, a tensor of size (n_boxes, 4)
     :return: bounding boxes in boundary coordinates, a tensor of size (n_boxes, 4)
     """
+function cxcy_to_xy(cxcy)
+    
     
     #println("Cxcy : ",cxcy[3:end])
     x_min_y_min = cxcy[:,1:2] .- (cxcy[:,3:end]./ 2 )  # x_min, y_min
@@ -228,11 +228,11 @@ function cxcy_to_xy(cxcy)
     return hcat(x_min_y_min, x_max_y_max)
     
 end
-
-function xy_to_cxcy(bbs)
-    """
+"""
     Converts (xmin ymin xmax ymax) form to (centerx, centery, width, height) format 
-    """
+"""
+function xy_to_cxcy(bbs)
+    
 
     centers = (bbs[:,1:2] .+ bbs[:,3:4])./2 #cx cy
     width_height = bbs[:,3:4] .- bbs[:,1:2] # width, height

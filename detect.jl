@@ -16,8 +16,9 @@ Output:
 """
 function detect_objects(predicted_locs, predicted_scores; min_score = 0.2 , max_overlap = 0.5, top_k = 200)
 
-    #predicted_locs = permutedims(predicted_locs,(2,1,3))
-    #predicted_scores = permutedims(predicted_scores,(2,1,3))
+    predicted_locs = permutedims(predicted_locs,(2,1,3))
+    predicted_scores = permutedims(predicted_scores,(2,1,3))
+    
     #println("Number of classes",n_classes)
     predicted_locs = Array(predicted_locs)
     predicted_scores = Array(predicted_scores)

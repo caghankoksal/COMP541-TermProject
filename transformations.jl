@@ -1,15 +1,15 @@
 using Random
 
 
+"""Reads image from given path and convert into Array form"""
 function readImage(img_path)
     
-    "Reads image from given path and convert into Array form"
     
-    img = load(img_path)
-    img_CHW = channelview(img) # 3*375*500
-    img_CHW = convert(Array{Float64}, img_CHW)
+    img = convert(Array{Float32},channelview(load(img_path)))
+    #img_CHW = channelview(img) # 3*375*500
+    #img_CHW = convert(Array{Float64}, img_CHW)
     
-    return img_CHW
+    return img
 end
 
 
@@ -83,8 +83,9 @@ function  saturationDistortion(image; lower=0.5, upper=1.5)
     img[2,:,:] .*= rate
 
     #Back to RGB
-    img =  channelview(colorview(RGB, img))
-    img = Array{Float64}(img)
+    img  = Array{Float32}(channelview(colorview(RGB, img)))
+    #img =  channelview(colorview(RGB, img))
+    #img = Array{Float32}(img)
     return img
 
 end
@@ -190,7 +191,7 @@ function transformation(image,boxes,labels, difficulties, split)
     
     
     # Bounding boxes are converted to percent coordinates in here     
-    new_image, new_boxes = resize(new_image, new_boxes; dims=(300, 300))
+    new_image, new_boxes = resize(new_image, new_boxes; dims=(3,300, 300))
 
 
     
@@ -202,7 +203,7 @@ end
     
 
 
-function resize(image, boxes; dims=(300, 300), return_percent_coords=true)
+function resize(image, boxes; dims=(3,300, 300), return_percent_coords=true)
     
     """
     Resize Image and bounding boxes to 300,300
@@ -210,12 +211,15 @@ function resize(image, boxes; dims=(300, 300), return_percent_coords=true)
 
     """
     
-    image  = colorview(RGB,image)
+    #image  = colorview(RGB,image)
+    
     
     # Resize image
-    new_image = imresize(image, dims)
+    new_image = imresize(image, (dims))
+    
+    
     # Resize bounding boxes
-    h,w = size(image)
+    c,h,w = size(image)
     h,w = Float16(h), Float16(w)
     
     # boxes, numberOfBoxes x 4  
@@ -229,9 +233,9 @@ function resize(image, boxes; dims=(300, 300), return_percent_coords=true)
     
 
     #new_boxes =  floor.(new_boxes)
-    new_image = channelview(new_image)
-    new_image = Array{Float64}(new_image)
-
+    #new_image = channelview(new_image)
+    #new_image = Array{Float64}(new_image)
+    
     return new_image, new_boxes
 end
 
@@ -248,7 +252,7 @@ function random_crop(image, boxes, labels, difficulties)
     # Keep choosing a minimum overlap until a successful crop is made
     while true
         # Randomly draw the value for minimum overlap
-        min_overlap_choices = [0., .1, .3, .5, .7, .9, nothing]  # 'nothing' refers to no cropping
+        min_overlap_choices = [0, 0.1, 0.3, 0.5, 0.7, 0.9, nothing]  # 'nothing' refers to no cropping
         
         min_overlap_idx =  rand(1:length(min_overlap_choices))
         min_overlap = min_overlap_choices[min_overlap_idx]
@@ -297,7 +301,7 @@ function random_crop(image, boxes, labels, difficulties)
             crop = [left top  right  bottom]  # (4)
 
             # Calculate Jaccard overlap between the crop and the bounding boxes
-            overlap = find_jaccard_overlap(crop, boxes)  # (1, n_objects), n_objects is the no. of objects in this image
+            overlap = find_jaccard_overlap_vectorized(crop, boxes)  # (1, n_objects), n_objects is the no. of objects in this image
            
             # If not a single bounding box has a Jaccard overlap of greater than the minimum, try again
             if maximum(overlap) < min_overlap
@@ -417,7 +421,7 @@ function normalize(new_image, mean, std)
     """
     Normalization with Image Net mean and std.
     """
-    new_image = new_image .- mean
-    new_image = new_image ./ std
-    return new_image
+    #new_image = new_image .- mean
+    #new_image = new_image ./ std
+    return (new_image .- mean)./std
 end

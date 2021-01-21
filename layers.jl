@@ -8,11 +8,41 @@ struct PoolLayer
     mode # 0 for max, 1 for average including padded values, 2 for average excluding padded values, 3 for deterministic max.
     custom_padding
 end
-
 function PoolLayer(;window=2, padding = 0, stride = window, mode=0,custom_padding=false)
     PoolLayer(window, padding, stride, mode, custom_padding)
 end
+"""
+function (p::PoolLayer)(x) 
+#println("typeof x :",typeof(x),"size x :",size(x))
+   if p.custom_padding
+        pad_value = 0
+        w,h,c,batch_size = size(x)
 
+        #t = fill(pad_value, (w+1,h+1,c,batch_size) )
+        t = zeros((w+1,h+1,c,batch_size))
+        #println(atype)
+        #println(x)
+        t = atype(t)
+        
+        t[1:w, 1:h, :, : ] .= x
+        
+        #println("Type t",typeof(t))
+        return pool(t)
+    end      
+    return pool(x, window = p.window, padding = p.padding, stride = p.stride, mode=p.mode)
+end
+#(p::PoolLayer)(x) = pool(x, window = p.window, padding = p.padding, stride = p.stride, mode=p.mode)
+
+function custom_pool_pad(data)
+    pad_value = 0
+    w,h,c,batch_size = size(data)
+
+    t = atype(fill(pad_value, (w+1,h+1,c,batch_size) ))
+    t[1:w, 1:h, :, : ]  = data
+    return pool(t)
+    
+end
+"""
 
 function (p::PoolLayer)(x) 
    if p.custom_padding

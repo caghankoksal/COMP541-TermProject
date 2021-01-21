@@ -187,12 +187,14 @@ function smooth_l1_loss(predicted_locs, true_locs,positive_indices,lower_indices
 end
 
 function l1_loss(predicted_locs, true_locs,positive_indices, posNumber)
+    #println("L1 loss size(predicted_locs)" ,size(predicted_locs))
+    #println("L1 loss size(true_locs)" ,size(true_locs))
     
-     result = Array(predicted_locs)[positive_indices,:].-(Array(true_locs)[positive_indices,:]) 
+     result = Array(predicted_locs)[:,positive_indices].- true_locs[:,positive_indices] 
      return sum(abs.(result))/posNumber
 end
 
-function loss_forward(predicted_locs, predicted_scores, boxes, labels,atype,priors_cxcy)
+function loss_forward(predicted_locs, predicted_scores, boxes, labels,atype,priors_cxcy, priors_xy)
     #Forward propagation.
     """
     Input:
@@ -213,11 +215,11 @@ function loss_forward(predicted_locs, predicted_scores, boxes, labels,atype,prio
     neg_pos_ratio = 3
     threshold = 0.5
     #Convert priors from center size coordinates to boundary coordiantes
-    priors_xy = cxcy_to_xy(priors_cxcy)
+    
     
    
-    true_locs = atype(zeros((n_priors, 4,batch_size))) # (N, 8732, 4)
-    true_classes = atype(zeros((batch_size, n_priors))) # (N, 8732)
+    true_locs = zeros(Float32,(n_priors, 4,batch_size)) # (N, 8732, 4)
+    true_classes = zeros((n_priors,batch_size)) # (N, 8732)
      
     
 # For each image
@@ -256,6 +258,8 @@ function loss_forward(predicted_locs, predicted_scores, boxes, labels,atype,prio
         overlap_for_each_prior[:,prior_for_each_object] .= 1
         
         
+        #println("i : ",i," labels : ",labels[i], "Number of objects : ",n_objects)
+        
         # Labels for each prior
         label_for_each_prior = labels[i][object_for_each_prior]  # (8732)
         # Set priors whose overlaps with objects are less than the threshold to be background (no object)
@@ -267,18 +271,21 @@ function loss_forward(predicted_locs, predicted_scores, boxes, labels,atype,prio
         
         
         # Store
-        true_classes[i,:] = label_for_each_prior
+        true_classes[:,i] = label_for_each_prior
        
         
         
         #ToDo : More efficent and clean code needed
         # For each bounding box that match with the prior we are extracting their coordinates
-        to_encode = hcat([ boxes[i][j,:] for j in object_for_each_prior ]...)'
+        #to_encode = hcat([ boxes[i][j,:] for j in object_for_each_prior ]...)'
+        #Efficient Code
+        to_encode = boxes[i][object_for_each_prior,:][1,:,:]
+        
         
         # Encode center-size object coordinates into the form we regressed predicted boxes to
         offsets =  cxcy_to_gcxgcy(xy_to_cxcy(to_encode), priors_cxcy)  # (8732, 4)
-        #println("offsets size",size(offsets))
-        true_locs[:,:,i] = Array(offsets)
+        #fprintln("offsets size",size(offsets))
+        true_locs[:,:,i] = offsets
         
     end
     
@@ -286,28 +293,36 @@ function loss_forward(predicted_locs, predicted_scores, boxes, labels,atype,prio
     #println("Size true_classes ",size(true_classes))
     # Identify priors that are positive (object/non-background)
     
-    true_classes = Array(true_classes)
+    #true_classes = Array(true_classes)
+    true_locs = permutedims(true_locs,(2,1,3))
     
     positive_indices = findall(x->x!=0, true_classes) # Cartesian Indices
-    negative_indices = findall(x-> x==0, true_classes) 
+    #negative_indices = findall(x-> x==0, true_classes) 
     
     
-    #println("Positive priors size",size(positive_priors))
+    #println("Positive priors size",size(positive_indices))
     #println("Positive indices size",size(positive_indices))
     #println("Pos priors element",positive_priors[1])
     
     n_positives = size(positive_indices,1) #(42,1)
     
     
+    #println(positive_indices)
+    #println("Before permutedims train predicted_locs",size(predicted_locs))
+    #println("Before permutedims train true_locs",size(true_locs))
     
-    predicted_locs = permutedims(predicted_locs,(3,1,2))
-    true_locs = permutedims(true_locs,(3,1,2))
+    #predicted_locs = permutedims(predicted_locs,(3,1,2))
+    #true_locs = permutedims(true_locs,(3,1,2))
+    
+    #println("After permutedims train predicted_locs",size(predicted_locs))
+    #println("After permutedims train true_locs",size(true_locs))
     
     
     # LOCALIZATION LOSS
     # Localization loss is computed only over positive (non-background) priors
     loc_loss = l1_loss(predicted_locs,true_locs,positive_indices,n_positives )  # (), scalar
     
+    #println("Localization loss",loc_loss)
     #smooth l1 
     #lower_indices, higher_indices = smooth_l1_loss_index(predicted_locs, true_locs,positive_indices)
     #loc_loss = smooth_l1_loss(predicted_locs, true_locs,positive_indices,lower_indices,higher_indices,n_positives)
@@ -324,15 +339,18 @@ function loss_forward(predicted_locs, predicted_scores, boxes, labels,atype,prio
     n_hard_negatives = neg_pos_ratio * n_positives  # (N)
     
     # Predicted_scores = (8732, 21, 10)
-    predicted_scores = permutedims(predicted_scores,(2,1,3))      #(21, 8732, 10)
     
-    true_classes = Array(true_classes)#True classes(2, 8732)
+    
+    
+    #predicted_scores = permutedims(predicted_scores,(2,1,3))      #(21, 8732, 10)
+    
+    #true_classes = Array(true_classes)#True classes(2, 8732)
     
     #println("True classes",size(true_classes)) #True classes(2, 8732)
     #println("Predicted_scores",size(predicted_scores)) #Predicted_scores(21, 8732, 2)
     
     
-    positiveIndices, hardestNegIndices, positiveTotal = findIndex_development(predicted_scores,true_classes;negativeRatio = neg_pos_ratio)
+    positiveIndices, hardestNegIndices, positiveTotal = findIndex_development2(predicted_scores,true_classes;negativeRatio = neg_pos_ratio)
     confidenceLoss = calculateNLLoss(predicted_scores, true_classes, positiveIndices, hardestNegIndices, positiveTotal)
     
     #println("Number offf posssitives", n_positives)
@@ -357,55 +375,69 @@ function calculateNLLoss(predicted_scores, true_classes, positiveIndices, hardes
     Output: Confidence Loss --> Positive Object loss + negative Loss
     """
     
-    batch_size = size(true_classes,1)
+    
+    #Calculate NLL Loss size true_classes(8732, 32)
+    #Calculate NLL Loss size predicted_scores(21, 8732, 32)
+    
+    #println("Calculate NLL Loss size true_classes", size(true_classes))
+    #println("Calculate NLL Loss size predicted_scores", size(predicted_scores))
+    batch_size = size(true_classes,2)
   
+    """
     for i in 1:batch_size
-        true_classes[i,hardestNegIndices[i]] .=1
-    end
+        true_classes[hardestNegIndices[i],i] .=1
+    end"""
     
     #true_classes = permutedims(true_classes,(2,1))
     
     totalLoss = 0
-    #            nll does not calculate loss on 0 indices, by converting hard negative indices to 1, loss can be calculated
+    # nll does not calculate loss on 0 indices, by converting hard negative indices to 1, loss can be calculated
     
     
     #println("NLL predicted_scores size", size(predicted_scores))
     #println("NLL true_classes size", size(true_classes))
     
     
-    for i in 1:batch_size
-        itemLoss = nll(predicted_scores[:,:,i], Integer.(true_classes[i,:]),dims=1,average=false)
-        #println(itemLoss)
-        totalLoss += itemLoss[1]
-    end
+ 
+    true_classes = Integer.(true_classes)
+    totalLoss = nll(predicted_scores,true_classes, dims=1,average=false)[1]
+    
+    
     return totalLoss
 end
 
+ 
+"""
+Find hardest negative indices by sorting the background scores for background object.
+Smallest Background scores for the background object will give the the most errorous classification for background.
+    index wise
+"""
 
 function findIndex_development(predicted_scores,true_classes;negativeRatio = 3)
-    
-    """
-    Find hardest negative indices by sorting the background scores for background object.
-    Smallest Background scores for the background object will give the the most errorous classification for background.
-    """
+   
+    #Size predicted_scores findIndex_development(21, 8732, 32)
+    #Size true classes findIndex_development (8732, 32)
 
-    true_classes = Array(true_classes) #(2,8372)
+    #
+    
+    #true_classes = Array(true_classes) #(2,8372)
     predicted_scores2 = Array(Knet.value(predicted_scores)) #( 21,8372, 2)
-    batch_size = size(true_classes,1)
+    batch_size = size(true_classes,2)
   
     hardestNegIndices = []
     positiveIndices = []
     
-    #println("findIndex_development", size(predicted_scores2)) (21, 8732, 4)
+    #println("findIndex_development predicted_scores2", size(predicted_scores2)) 
+    #println("findIndex_development true_classes", size(true_classes)) 
     
     positiveTotal = 0
     for i in 1:batch_size
+        
         #println(" TRUE CLASSES == 1", findall(x-> x==1, true_classes[i,:]))
-        negative_indices = findall(x-> x==0, true_classes[i,:] )
-        positive_indices = findall(x-> x!=0, true_classes[i,:]) # Cartesian Indices
+        negative_indices = findall(x-> x==0, true_classes[:,i] )
+        positive_indices = findall(x-> x!=0, true_classes[:,i]) # Cartesian Indices
         n_positive = size(positive_indices,1)
         n_negative = n_positive* negativeRatio
-        
         positiveTotal+=n_positive
         #println("Negative indices",negative_indices)
 
@@ -417,14 +449,68 @@ function findIndex_development(predicted_scores,true_classes;negativeRatio = 3)
         
         #Smallest Background scores for the background object will give the the most errorous classification for background.
         hard_indices =  sortperm(negative_values_scores_background)[1:n_negative]
-        hard_indices = negative_indices[hard_indices]
         
-        push!(hardestNegIndices,hard_indices)
+        #println(hard_indices,"\n\n\n")
+        hard_indices = negative_indices[hard_indices]
+        #println(hard_indices,"\n\n\n")
+        
+        
+        true_classes[hard_indices,i] .=1
+        #push!(hardestNegIndices,hard_indices)
         push!(positiveIndices,positive_indices)
     end
     
     return positiveIndices, hardestNegIndices,positiveTotal
     
 end
+"""
+Find hardest negative indices by sorting the background scores for background object.
+Smallest Background scores for the background object will give the the most errorous classification for background.
+batch wise
+"""
+function findIndex_development2(predicted_scores,true_classes;negativeRatio = 3)
+    
+   
+    
+    #Size predicted_scores findIndex_development(21, 8732, 32)
+    #Size true classes findIndex_development (8732, 32)
 
+    #
+    
+    #true_classes = Array(true_classes) #(2,8372)
+    predicted_scores2 = Array(Knet.value(predicted_scores)) #( 21,8372, 2)
+    batch_size = size(true_classes,2)
+  
+    hardestNegIndices = []
+    positiveIndices = []
+    
+    #println("findIndex_development predicted_scores2", size(predicted_scores2)) 
+    #println("findIndex_development true_classes", size(true_classes)) 
+    
+    negative_indices = findall(x-> x==0, true_classes)
+    positive_indices = findall(x-> x!=0, true_classes) # Cartesian Indices
+    n_positive = size(positive_indices,1)
+    n_negative = n_positive* negativeRatio
+    
+       
+    negative_values = predicted_scores2[:,negative_indices]
+    negative_values_scores_background = negative_values[1,:] # 1Background score
+    #println("Size negative_values_scores_background",size(negative_values_scores_background))
+        
+    #Smallest Background scores for the background object will give the the most errorous classification for background.
+    hard_indices =  sortperm(negative_values_scores_background)[1:n_negative]
+        
+    #println(hard_indices,"\n\n\n")
+    hard_indices = negative_indices[hard_indices]
+    #println(hard_indices,"\n\n\n")
+        
+        
+    true_classes[hard_indices] .=1
+    #push!(hardestNegIndices,hard_indices)
+    push!(positiveIndices,positive_indices)
+    
+    
+    return positiveIndices, hardestNegIndices,n_positive
+    
+end
 

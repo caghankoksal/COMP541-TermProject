@@ -1,6 +1,6 @@
 include("config.jl")
 
-function readIndex(indices,annotation_path,images_path,split; augmentation = true, dtype=Array{Float32}, whichDataset = [] )
+function readIndex(indices,annotation_pathD,images_pathD,split; augmentation = true, dtype=Array{Float32} )
     
     """
     Read the data with given indices.
@@ -18,24 +18,16 @@ function readIndex(indices,annotation_path,images_path,split; augmentation = tru
     #println("which dataset", whichDataset)
     
     #TODO parallel reading
-    for (i,idx) in enumerate(indices)
+    for idx in indices
         
         #for idx in indices
+           
+        curAnnotPath = annotation_pathD[idx]
+        curImgPath = images_pathD[idx]
+        bounding_box, label, diff= creteBBobject(curAnnotPath)
         
-        if whichDataset != []
-            curAnnPath = annotation_path[whichDataset[i]]
-            curImagesPath = images_path[whichDataset[i]]
-        else
-            curAnnPath = annotation_path
-            curImagesPath = images_path
-        end
-        
-        
-        bounding_box, label, diff= creteBBobject("$curAnnPath/$idx.xml")
-        
-        #println("Labels: ",label)
         # Reads Image
-        img = readImage("$curImagesPath/$idx.jpg")
+        img = readImage(curImgPath)
         
         new_image, new_boxes, new_labels, new_difficulties = transformation(img,bounding_box,label, diff, split)
         
@@ -77,7 +69,8 @@ struct PascalVOC
     images_path
     dtype
     multi_dataset::Bool
-    whichDataset::Array
+    annotationsPathDict::Dict
+    imagesPathDict::Dict
 end
     
 function PascalVOC(indices_path, annotation_path, images_path,split ; batchsize::Int=8, shuffle::Bool=false,
@@ -86,6 +79,10 @@ function PascalVOC(indices_path, annotation_path, images_path,split ; batchsize:
 
     indices = []
     whichDataset = []
+    
+    annotationsPathDict = Dict()
+    imagesPathDict = Dict()
+    
 
     if indices_path == test_VOC2012
         xmlFiles = readdir(annotation_path)
@@ -98,21 +95,35 @@ function PascalVOC(indices_path, annotation_path, images_path,split ; batchsize:
         for (i,p) in enumerate(indices_path)
             curIndices = readlines(p)
             push!(indices,curIndices )
-            push!(whichDataset, repeat([i], size(curIndices,1)))
+            
+            for eachIndex in curIndices
+                
+                curAnnotp = annotation_path[i]
+                curImp = images_path[i]
+                annotationsPathDict[eachIndex] =  "$curAnnotp/$eachIndex.xml"
+                imagesPathDict[eachIndex] = "$curImp/$eachIndex.jpg"
+            end
+           
 
         end
         indices = vcat(indices...)
-        whichDataset = vcat(whichDataset...)
-        whichDataset = vcat(whichDataset...)
+        
 
     else
-    indices = readlines(indices_path) 
+        indices = readlines(indices_path)
+        #ßprintln(indices)
+        
+        for eachIndex in indices
+            annotationsPathDict[eachIndex] =  "$annotation_path/$eachIndex.xml"
+            imagesPathDict[eachIndex] = "$images_path/$eachIndex.jpg"
+        end
+            
     end
 
     numInstance = size(indices,1)
 
     return PascalVOC(indices,batchsize,shuffle,numInstance,augmentation,split, annotation_path,
-    images_path, dtype, multi_dataset, whichDataset )
+    images_path, dtype, multi_dataset,annotationsPathDict,imagesPathDict  )
 end
 
 
@@ -147,13 +158,12 @@ function iterate(data::PascalVOC, state=ifelse(
         #return ((x,bounding_boxes,labels), [])
         return nothing
     else
-        if data.whichDataset != []
-            (x,bounding_boxes,labels,difficulties)  = readIndex(X[state[1:bs]], annotation_path, img_path,data.split, dtype = data.dtype, whichDataset =  data.whichDataset[state[1:bs]] )
-        else
-            (x,bounding_boxes,labels,difficulties)  = readIndex(X[state[1:bs]], annotation_path, img_path,data.split, dtype = data.dtype)
-        end
+       
+      (x,bounding_boxes,labels,difficulties) = readIndex(X[state[1:bs]],data.annotationsPathDict,data.imagesPathDict, data.split, dtype = data.dtype)
         return((x,bounding_boxes,labels,difficulties), state[bs+1:end])
     end
+        
+    
 end
 
 
